@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>登录 - 记账系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --primary-soft: #dbeafe;
+            --border: #e2e8f0;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --danger: #dc2626;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1d4ed8 0, #020617 55%, #000 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+        }
+        .shell {
+            width: 100%;
+            max-width: 960px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: 16px;
+        }
+        @media (max-width: 800px) {
+            .shell {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+        .hero {
+            color: #e5e7eb;
+            padding: 16px;
+        }
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 26px;
+        }
+        .hero p {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        .hero ul {
+            margin: 8px 0 0;
+            padding-left: 18px;
+            font-size: 13px;
+            color: #cbd5f5;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 22px 22px 18px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
+        }
+        .card h2 {
+            margin: 0 0 6px;
+            font-size: 18px;
+        }
+        .card p.sub {
+            margin: 0 0 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        form {
+            display: grid;
+            gap: 10px;
+        }
+        label {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 2px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .row a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .row a:hover {
+            text-decoration: underline;
+        }
+        button {
+            border-radius: 999px;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: #fff;
+            width: 100%;
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+            width: 100%;
+        }
+        .status {
+            margin-top: 8px;
+            min-height: 18px;
+            font-size: 12px;
+        }
+        .status-ok { color: #16a34a; }
+        .status-error { color: var(--danger); }
+        .status-pending { color: #ea580c; }
+        .links {
+            margin-top: 10px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .links a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+    <!-- 忘记密码模态框 -->
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>忘记密码</h3>
+                <button class="modal-close" onclick="closeForgotPasswordModal()">&times;</button>
+            </div>
+            <form id="forgot-password-form">
+                <div>
+                    <label>用户名</label>
+                    <input type="text" name="username" required />
+                </div>
+                <div>
+                    <label>真实姓名</label>
+                    <input type="text" name="realName" required />
+                </div>
+                <div>
+                    <label>新密码</label>
+                    <input type="password" name="newPassword" required minlength="6" />
+                </div>
+                <div>
+                    <label>确认新密码</label>
+                    <input type="password" name="confirmPassword" required minlength="6" />
+                </div>
+                <div style="margin-top:16px;">
+                    <button type="submit" class="btn-primary">重置密码</button>
+                </div>
+            </form>
+            <div id="forgot-password-status" class="status"></div>
+        </div>
+    </div>
+<div class="shell">
+    <section class="hero">
+        <h1>欢迎登录记账系统</h1>
+        <p>管理员账户：boss</p>
+        <p>密码：admin123</p>
+        <p>会计员账户：acct001</p>
+        <p>密码：admin123</p>
+    </section>
+
+    <section class="card">
+        <h2>登录</h2>
+        <p class="sub">输入用户名和密码登录系统（提交到 <code>POST /login</code>，由 Spring Security 进行真实认证）。</p>
+        <form id="login-form">
+            <div>
+                <label>用户名</label>
+                <input type="text" name="username" required />
+            </div>
+            <div>
+                <label>密码</label>
+                <input type="password" name="password" required />
+            </div>
+            <div class="row">
+                <label style="display:flex;align-items:center;gap:4px;">
+                    <input type="checkbox" name="remember" style="width:auto;" />
+                    记住我
+                </label>
+                <a href="javascript:void(0)" id="link-forgot-password">忘记密码？</a>
+            </div>
+            <div style="margin-top:10px;">
+                <button type="submit" class="btn-primary">登录</button>
+            </div>
+        </form>
+        <div id="login-status" class="status"></div>
+
+        <div class="links">
+            <span>还没有账号？<a href="/register.html">去注册</a></span>
+        </div>
+    </section>
+</div>
+
+<script>
+    const apiBase = '';
+
+    function setStatus(type, message) {
+        const el = document.getElementById('login-status');
+        if (!message) { el.textContent = ''; return; }
+        const cls = type === 'ok' ? 'status-ok' : type === 'error' ? 'status-error' : 'status-pending';
+        el.className = 'status ' + cls;
+        el.textContent = message;
+    }
+
+    // ===== 忘记密码功能 =====
+    function openForgotPasswordModal() {
+        document.getElementById('forgot-password-modal').classList.add('show');
+    }
+
+    function closeForgotPasswordModal() {
+        document.getElementById('forgot-password-modal').classList.remove('show');
+        document.getElementById('forgot-password-form').reset();
+        document.getElementById('forgot-password-status').textContent = '';
+    }
+
+    // 点击"忘记密码？"链接
+    document.getElementById('link-forgot-password').addEventListener('click', openForgotPasswordModal);
+
+    // 点击模态框背景关闭
+    document.getElementById('forgot-password-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'forgot-password-modal') {
+            closeForgotPasswordModal();
+        }
+    });
+
+    // 忘记密码表单提交
+    document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        const username = data.get('username')?.trim();
+        const realName = data.get('realName')?.trim();
+        const newPassword = data.get('newPassword');
+        const confirmPassword = data.get('confirmPassword');
+
+        const statusEl = document.getElementById('forgot-password-status');
+        
+        if (!username || !realName || !newPassword || !confirmPassword) {
+            statusEl.className = 'status status-error';
+            statusEl.textContent = '请完整填写所有字段。';
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            statusEl.className = 'status status-error';
+            statusEl.textContent = '两次输入的密码不一致。';
+            return;
+        }
+        if (newPassword.length < 6) {
+            statusEl.className = 'status status-error';
+            statusEl.textContent = '密码长度至少 6 位。';
+            return;
+        }
+
+        statusEl.className = 'status status-pending';
+        statusEl.textContent = '正在重置密码...';
+
+        try {
+            const resp = await fetch(apiBase + '/api/auth/forgot-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username,
+                    realName,
+                    newPassword
+                })
+            });
+
+            if (resp.ok) {
+                statusEl.className = 'status status-ok';
+                statusEl.textContent = '密码重置成功！请使用新密码登录。';
+                setTimeout(() => {
+                    closeForgotPasswordModal();
+                }, 2000);
+            } else {
+                let msg = '重置密码失败（HTTP ' + resp.status + '）';
+                try {
+                    const text = await resp.text();
+                    if (text) {
+                        const json = JSON.parse(text);
+                        msg = json.message || text;
+                    }
+                } catch (_) {}
+                statusEl.className = 'status status-error';
+                statusEl.textContent = msg;
+            }
+        } catch (err) {
+            console.error(err);
+            statusEl.className = 'status status-error';
+            statusEl.textContent = '重置密码失败：' + err.message;
+        }
+    });
+
+    // ===== 从URL参数自动填充用户名和密码 =====
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+        
+        if (username && password) {
+            // 自动填充用户名和密码
+            const usernameInput = document.querySelector('input[name="username"]');
+            const passwordInput = document.querySelector('input[name="password"]');
+            
+            if (usernameInput) {
+                usernameInput.value = decodeURIComponent(username);
+            }
+            if (passwordInput) {
+                passwordInput.value = decodeURIComponent(password);
+            }
+            
+            // 清除URL参数（保护隐私）
+            window.history.replaceState({}, document.title, '/login.html');
+            
+            // 自动提交登录表单（延迟一点时间让用户看到已填充的信息）
+            setTimeout(() => {
+                const form = document.getElementById('login-form');
+                if (form) {
+                    // 创建并触发submit事件
+                    const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
+                    form.dispatchEvent(submitEvent);
+                }
+            }, 800);
+        }
+    })();
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        const username = data.get('username');
+        const password = data.get('password');
+        const remember = data.get('remember') === 'on';
+
+        if (!username || !password) {
+            setStatus('error', '请输入用户名和密码。');
+            return;
+        }
+
+        setStatus('pending', '正在登录...');
+
+        try {
+            // Spring Security 表单登录默认接受 form-urlencoded：username, password, remember-me
+            const body = new URLSearchParams();
+            body.append('username', username);
+            body.append('password', password);
+            if (remember) {
+                body.append('remember-me', 'on');
+            }
+
+            const resp = await fetch(apiBase + '/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body
+                // 我们在后端已关闭 CSRF，这里无需特别处理 CSRF token
+            });
+
+            if (resp.redirected) {
+                // Spring Security 登录成功后会根据角色重定向
+                window.location.href = resp.url;
+                return;
+            }
+
+            if (resp.ok) {
+                // 登录成功，获取用户信息并根据角色跳转
+                try {
+                    const userResp = await fetch(apiBase + '/api/auth/me', {
+                        credentials: 'include'
+                    });
+                    if (userResp.ok) {
+                        const user = await userResp.json();
+                        if (user.isAdmin) {
+                            window.location.href = '/index.html';
+                        } else {
+                            window.location.href = '/accountant.html';
+                        }
+                    } else {
+                        // 如果获取用户信息失败，默认跳转到管理员页面
+                        window.location.href = '/index.html';
+                    }
+                } catch (e) {
+                    console.error('获取用户信息失败:', e);
+                window.location.href = '/index.html';
+                }
+                return;
+            }
+
+            setStatus('error', '登录失败：用户名或密码错误（HTTP ' + resp.status + '）。');
+        } catch (err) {
+            console.error(err);
+            setStatus('error', '登录失败：' + err.message);
+        }
+    });
+</script>
+</body>
+</html>
+
+

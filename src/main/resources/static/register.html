@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>注册 - 记账系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --primary-soft: #dbeafe;
+            --border: #e2e8f0;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --danger: #dc2626;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #22c55e 0, #020617 55%, #000 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+        }
+        .shell {
+            width: 100%;
+            max-width: 960px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: 16px;
+        }
+        @media (max-width: 800px) {
+            .shell {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+        .hero {
+            color: #e5e7eb;
+            padding: 16px;
+        }
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 26px;
+        }
+        .hero p {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        .hero ul {
+            margin: 8px 0 0;
+            padding-left: 18px;
+            font-size: 13px;
+            color: #cbd5f5;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 22px 22px 18px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
+        }
+        .card h2 {
+            margin: 0 0 6px;
+            font-size: 18px;
+        }
+        .card p.sub {
+            margin: 0 0 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        form {
+            display: grid;
+            gap: 10px;
+        }
+        label {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 2px;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .row small {
+            color: var(--text-muted);
+        }
+        button {
+            border-radius: 999px;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            width: 100%;
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+            width: 100%;
+        }
+        .status {
+            margin-top: 8px;
+            min-height: 18px;
+            font-size: 12px;
+        }
+        .status-ok { color: #16a34a; }
+        .status-error { color: var(--danger); }
+        .status-pending { color: #ea580c; }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .links {
+            margin-top: 10px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .links a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <section class="hero">
+        <h1>创建你的记账系统账号</h1>
+    </section>
+
+    <section class="card">
+        <h2>注册</h2>
+        <p class="sub">填写信息创建新账号（提交到 <code>POST /api/auth/register</code>，成功后可前往登录页面登录）。</p>
+        <form id="register-form">
+            <div>
+                <label>用户名</label>
+                <input type="text" name="username" id="input-username" required />
+                <small id="username-hint" style="font-size:11px;color:var(--text-muted);display:none;"></small>
+            </div>
+            <div>
+                <label>真实姓名</label>
+                <input type="text" name="realName" required />
+            </div>
+            <div>
+                <label>密码</label>
+                <input type="password" name="password" required minlength="6" />
+            </div>
+            <div>
+                <label>确认密码</label>
+                <input type="password" name="confirmPassword" required minlength="6" />
+            </div>
+            <div class="row">
+                <small>密码至少 6 位，建议包含字母和数字。</small>
+            </div>
+            <div style="margin-top:10px;">
+                <button type="submit" id="btn-register" class="btn-primary">注册</button>
+            </div>
+        </form>
+        <div id="register-status" class="status"></div>
+
+        <div class="links">
+            <span>已经有账号？<a href="/login.html">去登录</a></span>
+        </div>
+    </section>
+</div>
+
+<script>
+    const apiBase = '';
+
+    function setStatus(type, msg) {
+        const el = document.getElementById('register-status');
+        if (!msg) { el.textContent = ''; return; }
+        const cls = type === 'ok' ? 'status-ok' : type === 'error' ? 'status-error' : 'status-pending';
+        el.className = 'status ' + cls;
+        el.textContent = msg;
+    }
+
+    // ===== 用户名实时检查 =====
+    let usernameCheckTimer = null;
+    const usernameInput = document.getElementById('input-username');
+    const usernameHint = document.getElementById('username-hint');
+    const registerBtn = document.getElementById('btn-register');
+    let isUsernameAvailable = true;
+
+    usernameInput.addEventListener('input', () => {
+        const username = usernameInput.value.trim();
+        
+        // 清除之前的定时器
+        if (usernameCheckTimer) {
+            clearTimeout(usernameCheckTimer);
+        }
+        
+        // 隐藏提示
+        usernameHint.style.display = 'none';
+        registerBtn.disabled = false;
+        isUsernameAvailable = true;
+        
+        if (!username) {
+            return;
+        }
+        
+        // 禁止使用管理员账户名
+        if (username.toLowerCase() === 'boss') {
+            usernameHint.style.display = 'block';
+            usernameHint.style.color = 'var(--danger)';
+            usernameHint.textContent = '❌ 管理员账户名不能使用';
+            registerBtn.disabled = true;
+            isUsernameAvailable = false;
+            return;
+        }
+        
+        // 延迟检查，避免频繁请求
+        usernameCheckTimer = setTimeout(async () => {
+            try {
+                const resp = await fetch(apiBase + '/api/auth/check-username?username=' + encodeURIComponent(username));
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.exists) {
+                        usernameHint.style.display = 'block';
+                        usernameHint.style.color = 'var(--danger)';
+                        usernameHint.textContent = '❌ 用户名已存在，请使用其他用户名';
+                        registerBtn.disabled = true;
+                        isUsernameAvailable = false;
+                    } else {
+                        usernameHint.style.display = 'block';
+                        usernameHint.style.color = '#16a34a';
+                        usernameHint.textContent = '✓ 用户名可用';
+                        registerBtn.disabled = false;
+                        isUsernameAvailable = true;
+                    }
+                }
+            } catch (e) {
+                console.error('检查用户名失败:', e);
+            }
+        }, 500);
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        const username = data.get('username')?.trim();
+        const realName = data.get('realName')?.trim();
+        const password = data.get('password');
+        const confirmPassword = data.get('confirmPassword');
+
+        if (!username || !realName || !password || !confirmPassword) {
+            setStatus('error', '请完整填写所有字段。');
+            return;
+        }
+        // 检查用户名是否可用
+        if (!isUsernameAvailable) {
+            setStatus('error', '用户名不可用，请使用其他用户名。');
+            return;
+        }
+        if (password !== confirmPassword) {
+            setStatus('error', '两次输入的密码不一致。');
+            return;
+        }
+        if (password.length < 6) {
+            setStatus('error', '密码长度至少 6 位。');
+            return;
+        }
+
+        setStatus('pending', '正在注册...');
+
+        try {
+            const resp = await fetch(apiBase + '/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username,
+                    realName,
+                    password
+                })
+            });
+
+            if (resp.ok) {
+                setStatus('ok', '注册成功！正在跳转到登录页面...');
+                // 跳转到登录页面，并通过URL参数传递用户名和密码
+                const encodedUsername = encodeURIComponent(username);
+                const encodedPassword = encodeURIComponent(password);
+                setTimeout(() => {
+                    window.location.href = `/login.html?username=${encodedUsername}&password=${encodedPassword}`;
+                }, 1000);
+                return;
+            }
+
+            let msg = '注册失败（HTTP ' + resp.status + '）';
+            try {
+                const text = await resp.text();
+                if (text) {
+                    msg += '：' + text;
+                }
+            } catch (_) {}
+            setStatus('error', msg);
+        } catch (err) {
+            console.error(err);
+            setStatus('error', '注册失败：' + err.message);
+        }
+    });
+</script>
+</body>
+</html>
+
+

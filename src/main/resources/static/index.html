@@ -1,0 +1,1814 @@
+<!-- 管理员账户：boss / admin123 -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>会计系统 - 管理后台</title>
+  <style>
+    :root{
+      --bg: #f6f8fb;
+      --card-bg: #ffffff;
+      --primary: #2563eb;
+      --primary-600: #1f4fcf;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --muted: #6b7280;
+      --border: rgba(15,23,42,0.06);
+      --surface-elev: 0 10px 30px rgba(2,6,23,0.08);
+      --radius-lg: 12px;
+    }
+
+    /* Global */
+    html,body{height:100%}
+    body{
+      font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: #0f172a;
+      margin: 0;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      font-size:14px;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:24px auto;
+      padding:20px;
+    }
+
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    header h2{font-weight:600;margin:0}
+    header .muted{color:var(--muted);font-size:13px}
+
+    /* Cards and surfaces */
+    .card{
+      background:var(--card-bg);
+      border-radius:var(--radius-lg);
+      padding:18px;
+      margin-top:16px;
+      border:1px solid var(--border);
+      box-shadow:var(--surface-elev);
+    }
+
+    .card-small{padding:12px;border-radius:10px}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .tab{
+      padding:8px 14px;border-radius:10px;cursor:pointer;background:transparent;border:1px solid transparent;color:var(--muted);
+    }
+    .tab.active{background:linear-gradient(180deg, rgba(37,99,235,0.08), rgba(37,99,235,0.03));border-color:rgba(37,99,235,0.12);color:var(--primary);font-weight:600}
+
+    /* Buttons */
+    .btn{
+      padding:8px 12px;border-radius:10px;border:1px solid rgba(2,6,23,0.06);background:#fff;cursor:pointer;color:#0f172a;
+      box-shadow: none;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:var(--primary);color:#fff;border-color:var(--primary);
+      box-shadow: 0 6px 20px rgba(37,99,235,0.12);
+    }
+    .btn.ghost{background:transparent;border:1px dashed rgba(2,6,23,0.06);color:var(--muted)}
+
+    .muted{color:var(--muted)}
+    .badge{display:inline-block;padding:3px 8px;border-radius:12px;background:var(--danger);color:#fff;font-size:12px}
+
+    textarea{width:100%;min-height:84px;padding:10px;border-radius:10px;border:1px solid #e6e9ef;background:#fff}
+    input[type="text"], input[type="number"], select{padding:8px;border-radius:8px;border:1px solid var(--border);background:#fff}
+
+    /* Tables */
+    table{width:100%;border-collapse:collapse;font-size:13px;background:transparent}
+    th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left}
+    th{position:sticky;top:0;background:#fff;font-weight:600}
+    tbody tr:hover{background:rgba(37,99,235,0.03)}
+
+    /* Layout helpers */
+    .summary-row{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
+    .summary-card{flex:1;min-width:180px;background:linear-gradient(180deg,#fff,#fbfdff);padding:12px;border-radius:10px;border:1px solid rgba(2,6,23,0.04);box-shadow:0 6px 18px rgba(2,6,23,0.03)}
+
+    /* Reports grid */
+    .reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+    .report-card{background:linear-gradient(180deg,#fff,#fbfdff);padding:14px;border-radius:12px;border:1px solid rgba(2,6,23,0.06);box-shadow:0 8px 24px rgba(2,6,23,0.04)}
+
+    /* Responsive */
+    @media (max-width:960px){
+      .reports-grid{grid-template-columns:1fr}
+      .summary-row{flex-direction:column}
+      .container{padding:12px}
+    }
+
+    /* Purchase specific */
+    #purchases .purchases-grid{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+    #purchases .purchases-col{flex:1;min-width:300px}
+    #purchases .purchase-card{background:#fff;border-radius:12px;padding:14px;border:1px solid var(--border);box-shadow:0 8px 20px rgba(2,6,23,0.04)}
+    #purchases .purchase-card h4{margin:0 0 8px}
+    #purchases input[type="text"], #purchases input[type="number"], #purchases select{padding:10px;border-radius:8px;border:1px solid var(--border);width:100%;margin-bottom:8px}
+
+    /* Draft button special */
+    #open-drafts-btn{display:flex;align-items:center;gap:8px}
+    #drafts-badge{min-width:24px;text-align:center;font-weight:600}
+
+  </style>
+  
+</head>
+<body>
+  <div class="container">
+<header>
+    <div>
+        <h2 style="margin:0">会计系统 管理后台</h2>
+        <div class="muted">管理员视图</div>
+    </div>
+      <div id="user-area">
+        <span id="current-user" class="muted"></span>
+        <button id="logout" class="btn" style="margin-left:10px">退出</button>
+    </div>
+</header>
+
+<!-- debug banner removed -->
+
+            <div class="card">
+      <nav>
+        <!-- 登录/注册/会计页面 链接已移除，主页展示账户余额概览 -->
+        <span style="font-weight:600">账户余额总览</span>
+      </nav>
+      <!-- 置顶 summary 卡已移除，主页展示账户余额概览 -->
+      <div class="tabs">
+        <div class="tab active" data-tab="home">首页</div>
+        <div class="tab" data-tab="transactions">交易录入</div>
+        <div class="tab" data-tab="reconcile">对账/未清算 <span id="reconcile-badge"></span></div>
+        <div class="tab" data-tab="reports">财务报表</div>
+        <div class="tab" data-tab="employees">员工管理</div>
+        <div class="tab" data-tab="purchases">采购管理</div>
+                    </div>
+            </div>
+
+    <div id="home" class="card" style="display:block">
+      <h3>账户余额总览</h3>
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <div class="muted">总资产</div>
+          <div id="home-assets" style="font-size:20px;font-weight:700;color:#10b981">0.00</div>
+                    </div>
+        <div style="flex:1;min-width:220px;">
+          <div class="muted">总负债</div>
+          <div id="home-liabilities" style="font-size:20px;font-weight:700;color:#f97316">0.00</div>
+                    </div>
+        <div style="flex:1;min-width:220px;">
+          <div class="muted">所有者权益</div>
+          <div id="home-equity" style="font-size:20px;font-weight:700;color:#3b82f6">0.00</div>
+        </div>
+                    </div>
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <div style="flex:1">
+          <div class="muted">今日收入</div>
+          <div id="home-today-income" style="font-size:18px;font-weight:700;color:#10b981">0.00</div>
+                    </div>
+        <div style="flex:1">
+          <div class="muted">今日支出</div>
+          <div id="home-today-expense" style="font-size:18px;font-weight:700;color:#ef4444">0.00</div>
+                    </div>
+                    </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h4 style="margin:0">所有账户余额</h4>
+          <div><button id="export-accounts-csv" class="btn">导出 CSV</button></div>
+        </div>
+        <div id="home-accounts" style="margin-top:12px"></div>
+                    </div>
+
+    <div id="transactions" class="card" style="display:none">
+      <h3>交易录入</h3>
+      <button id="open-tx-history" class="btn ghost" style="margin-left:8px;display:none">交易历史</button>
+      <div style="margin-bottom:8px">
+        日期：<input id="tx-date" type="datetime-local">
+        摘要：<input id="tx-desc" type="text" style="width:40%;margin-left:8px">
+        参考号：<input id="tx-ref" type="text" style="margin-left:8px">
+                    </div>
+      <table>
+        <thead><tr><th>账户</th><th>方向</th><th>金额</th><th>操作</th></tr></thead>
+        <tbody id="splits-tbody"></tbody>
+                    </table>
+      <div style="margin-top:8px">
+        <button id="add-split" class="btn">添加分录</button>
+        <input id="tx-files" type="file" multiple style="margin-left:12px">
+        <button id="submit-tx" class="btn primary" style="margin-left:12px">提交</button>
+                </div>
+      <div id="tx-result" style="margin-top:8px"></div>
+        </div>
+      <!-- Admin inline history panel (visible to admins) -->
+      <div id="tx-history-inline" class="card" style="display:none;margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h4 style="margin:0">交易历史（管理员视图）</h4>
+          <div>
+            <input id="tx-inline-q" placeholder="按摘要/参考号搜索" style="padding:6px;border-radius:6px;border:1px solid var(--border)"/>
+            <button id="tx-inline-search" class="btn">搜索</button>
+          </div>
+        </div>
+        <div id="tx-history-inline-body">加载中...</div>
+      </div>
+        </div>
+
+    <div id="reconcile" class="card" style="display:none">
+      <h3>对账 / 未清算</h3>
+      <div id="reconcile-list"></div>
+            </div>
+
+    <div id="reports" class="card" style="display:none">
+      <h3>财务报表</h3>
+      <div id="reports-area">
+        <!-- (removed empty preview placeholders to avoid large blank area) -->
+        <div class="reports-grid" style="margin-top:12px">
+          <div class="report-card">
+            <div class="report-toolbar">
+              <div class="left">资产负债表（Balance Sheet）</div>
+              <div class="right">
+                <div class="report-actions">
+                  <button id="btn-refresh-balance" class="btn">刷新</button>
+                  <button id="btn-export-balance" class="btn">导出 CSV</button>
+                </div>
+              </div>
+            </div>
+            <div id="balance-sheet"></div>
+          </div>
+          <div class="report-card">
+            <div class="report-toolbar">
+              <div class="left">损益表（Income Statement）</div>
+              <div class="right">
+                <div class="report-actions">
+                  <button id="btn-refresh-income" class="btn">刷新</button>
+                  <button id="btn-export-income" class="btn">导出 CSV</button>
+                </div>
+              </div>
+            </div>
+            <div id="income-statement"></div>
+          </div>
+        </div>
+        <div style="margin-top:12px" class="report-card">
+          <div class="report-toolbar">
+            <div class="left">试算平衡表（Trial Balance）</div>
+            <div class="right">
+              <div class="report-actions">
+                <button id="btn-refresh-trial" class="btn">刷新</button>
+                <button id="btn-export-trial" class="btn">导出 CSV</button>
+              </div>
+            </div>
+          </div>
+          <div id="trial-balance"></div>
+        </div>
+      </div>
+      <!-- 第二行：今日收支 -->
+      <div id="today-row" style="display:flex;gap:12px;margin-top:12px;align-items:stretch;">
+        <div class="card" style="flex:1;">
+          <div class="muted">今日收入</div>
+          <div id="today-income" style="font-size:20px;font-weight:700;color:#10b981">0.00</div>
+            </div>
+        <div class="card" style="flex:1;">
+          <div class="muted">今日支出</div>
+          <div id="today-expense" style="font-size:20px;font-weight:700;color:#ef4444">0.00</div>
+        </div>
+                </div>
+            </div>
+
+    <div id="employees" class="card" style="display:none">
+      <h3>员工账户管理</h3>
+      <div id="employees-list"></div>
+            </div>
+    <div id="purchases" class="card" style="display:none">
+      <h3>采购管理</h3>
+      <div class="purchases-grid">
+        <div class="purchases-col">
+          <div class="purchase-card">
+            <h4>供应商管理</h4>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+              <input id="sup-q" placeholder="按供应商或商品搜索" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px">
+              <button id="btn-sup-search" class="btn">搜索</button>
+            </div>
+            <div id="sup-list" style="margin-top:8px"></div>
+            <hr style="margin:12px 0">
+            <h5 style="margin:6px 0">添加供应商</h5>
+            <div style="display:grid;gap:8px">
+              <input id="sup-name" placeholder="供应商名称" />
+              <input id="sup-location" placeholder="地点" />
+              <input id="sup-email" placeholder="邮箱" />
+              <input id="sup-product" placeholder="商品名称" />
+              <input id="sup-price" placeholder="商品单价" type="number" step="0.01" />
+              <div><button id="btn-create-sup" class="btn primary">创建供应商</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="purchases-col">
+          <div class="purchase-card">
+            <h4>采购单提交 / 我的采购单</h4>
+            <div style="display:grid;gap:8px">
+              <select id="po-supplier"></select>
+              <input id="po-product" placeholder="采购商品名称" />
+              <input id="po-qty" placeholder="数量" type="number" />
+              <div style="text-align:right"><button id="btn-submit-po" class="btn primary">提交采购单</button></div>
+            </div>
+            <hr style="margin:12px 0">
+            <h5 style="margin:6px 0">我的采购单</h5>
+            <div id="my-orders"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="purchase-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <h4 style="margin:0">管理员：待审核采购单</h4>
+          </div>
+          <div id="pending-orders"></div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="purchase-card" id="admin-all-orders-card" style="display:none">
+          <h4 style="margin:0 0 8px">所有员工历史采购订单</h4>
+          <div id="all-orders"></div>
+        </div>
+      </div>
+    </div>
+        </div>
+
+<script>
+  // debug logging removed
+
+    // tab切换
+    async function showTab(name){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+      ['home','transactions','reconcile','reports','employees','purchases'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.style.display = (id===name)?'block':'none';
+      });
+      // lazy-load content when switching tabs
+      try{
+        if(name === 'reports'){
+          if(typeof loadBalanceSheet === 'function') await loadBalanceSheet();
+          if(typeof loadIncomeStatement === 'function') await loadIncomeStatement();
+          if(typeof loadTrialBalance === 'function') await loadTrialBalance();
+          await loadTodayIncomeExpense();
+        } else if(name === 'employees'){
+          if(typeof loadEmployees === 'function') await loadEmployees();
+        } else if(name === 'purchases'){
+          // ensure current user loaded
+          if(typeof window.__currentUser === 'undefined' || window.__currentUser === null){
+            try{ await loadCurrentUser(); }catch(e){ console.warn('loadCurrentUser failed in showTab', e); }
+          }
+          if(typeof loadSuppliers === 'function') await loadSuppliers('');
+          if(typeof loadMyOrders === 'function') await loadMyOrders();
+          // if admin, load pending and all orders
+          try{
+            if(window.__currentUser && (window.__currentUser.isAdmin || window.__currentUser.role === 'ROLE_ADMIN')){
+              if(typeof loadPendingOrders === 'function') await loadPendingOrders();
+              if(typeof loadAllOrders === 'function') await loadAllOrders();
+            }
+          }catch(e){ console.error('purchases load failed', e); }
+        }
+      }catch(e){ console.error('showTab load error', e); }
+    }
+    document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', async ()=> await showTab(t.dataset.tab)));
+
+    // 用户信息与注销
+    async function loadCurrentUser(){
+      try{
+        const r = await fetch('/api/auth/me', {credentials:'include'});
+        const ct = r.headers.get('content-type')||'';
+        if(!r.ok || !ct.includes('application/json')){
+          // likely redirected to login page; treat as not logged in
+          document.getElementById('current-user').textContent = '未登录';
+          window.__currentUser = null;
+            return;
+        }
+        const u = await r.json();
+        document.getElementById('current-user').textContent = `${u.realName||u.username} (${u.role||''})`;
+        // store current user for badge notifications
+        window.__currentUser = u;
+      }catch(e){
+        console.error(e);
+        document.getElementById('current-user').textContent = '未登录';
+      }
+    }
+    // helper to determine admin privileges robustly
+    function isAdminUser(user){
+      if(!user) return false;
+      if(user.isAdmin) return true;
+      const role = (user.role || user.authority || user.roleName || '').toString().toUpperCase();
+      if(role.includes('ADMIN')) return true;
+      // support Spring Security style arrays
+      if(user.roles && Array.isArray(user.roles)){
+        for(const r of user.roles){ if((r||'').toString().toUpperCase().includes('ADMIN')) return true; }
+      }
+      if(user.authorities && Array.isArray(user.authorities)){
+        for(const a of user.authorities){ if((a||'').toString().toUpperCase().includes('ADMIN')) return true; }
+      }
+      return false;
+    }
+    document.getElementById('logout').addEventListener('click', async ()=>{
+      await fetch('/logout', {method:'POST', credentials:'include'});
+      location.href='/login.html';
+    });
+
+    // 账户加载与分录行
+    let accounts = [];
+    async function loadAccounts(){
+      try{
+        const r = await fetch('/api/accounts', {credentials:'include'});
+        if(!r.ok) return;
+        accounts = await r.json();
+      }catch(e){}
+    }
+    // ===== 新：加载账户余额表格与汇总 =====
+    async function loadAccountsTable(){
+      try{
+            await loadAccounts();
+        const tblContainer = document.getElementById('home-accounts') || document.getElementById('reconcile-list');
+        if(!tblContainer) return;
+        const rows = accounts.map(a=>({
+          id:a.id, code:a.code, name:a.name, type:a.type, balance:a.balance
+        }));
+        let html = '<h3>所有账户余额</h3><div style="max-height:400px;overflow:auto;"><table><thead><tr><th>科目代码</th><th>名称</th><th>类别</th><th style="text-align:right">余额</th></tr></thead><tbody>';
+        rows.forEach(r=> html += `<tr><td>${r.code||''}</td><td>${r.name||''}</td><td>${r.type||''}</td><td style="text-align:right">${Number(r.balance||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`);
+        html += '</tbody></table></div>';
+        tblContainer.innerHTML = html;
+        // Compute aggregated totals from accounts as a fallback/source of truth
+        try{
+          let assetsSum = 0, liabilitiesSum = 0, equitySum = 0;
+          accounts.forEach(a=>{
+            const bal = Number(a.balance || 0);
+            const t = (a.type || '').toUpperCase();
+            const code = (a.code || '').trim().toUpperCase();
+            const name = (a.name || '').toUpperCase();
+            // robust detection: prefer explicit type keywords, then code prefix, then name keywords
+            if(t.includes('ASSET') || t === 'ASSET' || code.startsWith('A') || name.includes('资产')) {
+              assetsSum += bal;
+            } else if(t.includes('LIABIL') || t === 'LIABILITY' || code.startsWith('L') || name.includes('负债')) {
+              liabilitiesSum += bal;
+            } else if(t.includes('EQUITY') || t === 'EQUITY' || code.startsWith('E') || code.startsWith('O') || name.includes('权益') || name.includes('所有者')) {
+              equitySum += bal;
+            } else {
+              // fallback: treat positive as asset by default
+              assetsSum += bal;
+            }
+          });
+          const fmt = v => Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+          if(document.getElementById('home-assets')) document.getElementById('home-assets').textContent = fmt(assetsSum);
+          if(document.getElementById('home-liabilities')) document.getElementById('home-liabilities').textContent = fmt(liabilitiesSum);
+          if(document.getElementById('home-equity')) document.getElementById('home-equity').textContent = fmt(equitySum);
+          if(document.getElementById('summary-assets')) document.getElementById('summary-assets').textContent = fmt(assetsSum);
+          if(document.getElementById('summary-liabilities')) document.getElementById('summary-liabilities').textContent = fmt(liabilitiesSum);
+          if(document.getElementById('summary-equity')) document.getElementById('summary-equity').textContent = fmt(equitySum);
+        }catch(e){}
+      }catch(e){
+        console.error('loadAccountsTable', e);
+      }
+    }
+
+    async function loadSummaryFromBalanceSheet(){
+      try{
+        // helper to format numbers and set summary values — define before use to avoid TDZ
+        const fmt = v => Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        function setSummaryValues(assets, liabilities, equity){
+          if(document.getElementById('summary-assets')) document.getElementById('summary-assets').textContent = fmt(assets);
+          if(document.getElementById('summary-liabilities')) document.getElementById('summary-liabilities').textContent = fmt(liabilities);
+          if(document.getElementById('summary-equity')) document.getElementById('summary-equity').textContent = fmt(equity);
+          if(document.getElementById('home-assets')) document.getElementById('home-assets').textContent = fmt(assets);
+          if(document.getElementById('home-liabilities')) document.getElementById('home-liabilities').textContent = fmt(liabilities);
+          if(document.getElementById('home-equity')) document.getElementById('home-equity').textContent = fmt(equity);
+        }
+        // Prefer the new backend summary endpoint if available
+        const r = await fetch('/api/reports/today-summary', {credentials:'include'});
+        if (r.status === 401) {
+          ['summary-assets','summary-liabilities','summary-equity','home-assets','home-liabilities','home-equity'].forEach(id=>{
+            const el = document.getElementById(id);
+            if(el) el.textContent = '请登录';
+          });
+          return;
+        }
+        if(!r.ok){
+          // fallback to balance-sheet endpoint
+          const rb = await fetch('/api/reports/balance-sheet', {credentials:'include'});
+          if(!rb.ok) return;
+          const j = await rb.json();
+          const assets = j.assetsTotal || (j.assets||[]).reduce((s,i)=>s+Number(i.amount||0),0);
+          const liabilities = j.liabilitiesTotal || (j.liabilities||[]).reduce((s,i)=>s+Number(i.amount||0),0);
+          const equity = j.equityTotal || (j.equity||[]).reduce((s,i)=>s+Number(i.amount||0),0);
+          setSummaryValues(assets, liabilities, equity);
+          return;
+        }
+        const data = await r.json();
+        const assets = data.assetsTotal || 0;
+        const liabilities = data.liabilitiesTotal || 0;
+        const equity = data.equityTotal || 0;
+        const todayIncome = data.todayIncome || 0;
+        const todayExpense = data.todayExpense || 0;
+        setSummaryValues(assets, liabilities, equity);
+        // set today values too
+        if(document.getElementById('home-today-income')) document.getElementById('home-today-income').textContent = fmt(todayIncome);
+        if(document.getElementById('home-today-expense')) document.getElementById('home-today-expense').textContent = fmt(todayExpense);
+      }catch(e){ console.error('loadSummaryFromBalanceSheet', e); }
+    }
+
+    async function loadTodayIncomeExpense(){
+      try{
+        // load accounts map
+        await loadAccounts();
+        const accMap = {};
+        accounts.forEach(a=> accMap[a.id] = a);
+        // fetch recent transactions (size large enough)
+        const r = await fetch('/api/transactions?page=0&size=500', {credentials:'include'});
+        if(!r.ok) return;
+        const data = await r.json();
+        const txs = data.content || [];
+        const today = new Date().toISOString().slice(0,10);
+        let income = 0, expense = 0;
+        txs.forEach(tx=>{
+          const td = (tx.tradeDate||'').slice(0,10);
+          if(td !== today) return;
+          (tx.splits||[]).forEach(s=>{
+            const acct = accMap[s.accountId] || {};
+            const amount = Number(s.amount || 0);
+            const dir = s.direction || s.direction;
+            if(acct.type === 'INCOME'){
+              if(dir === 'CREDIT') income += amount;
+              else income -= amount;
+            } else if(acct.type === 'EXPENSE'){
+              if(dir === 'DEBIT') expense += amount;
+              else expense -= amount;
+            }
+          });
+        });
+        const fmt = v => Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        document.getElementById('today-income').textContent = fmt(income);
+        document.getElementById('today-expense').textContent = fmt(Math.abs(expense));
+        if(document.getElementById('home-today-income')) document.getElementById('home-today-income').textContent = fmt(income);
+        if(document.getElementById('home-today-expense')) document.getElementById('home-today-expense').textContent = fmt(Math.abs(expense));
+      }catch(e){ console.error('loadTodayIncomeExpense', e); }
+    }
+    // ===== 报表：在首页中也提供改进版加载器（含导出） =====
+    function toCurrency(v){
+      try{ return Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }catch(e){ return String(v); }
+    }
+    function exportCSV(filename, headers, rows){
+      const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+      let csv = headers.map(esc).join(',') + '\\n';
+      rows.forEach(r => { csv += headers.map(h => esc(r[h] ?? '')).join(',') + '\\n'; });
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+      a.remove(); URL.revokeObjectURL(url);
+    }
+    async function loadBalanceSheet(){
+      const el = document.getElementById('balance-sheet');
+      if(!el) return;
+      el.innerHTML = '<div class="status-pending">加载中...</div>';
+      try{
+        const resp = await fetch('/api/reports/balance-sheet', {credentials:'include'});
+        if(!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        console.debug('loadBalanceSheet response', data);
+        // update mini overview and hide if no data to avoid large blank area
+        try{
+          const mini = document.getElementById('mini-balance');
+          if(mini){
+            const assets = (data.assets || []).reduce((s,i)=>s+Number(i.amount||0),0);
+            const liabilities = (data.liabilities || []).reduce((s,i)=>s+Number(i.amount||0),0);
+            const equity = (data.equity || []).reduce((s,i)=>s+Number(i.amount||0),0);
+            if(assets===0 && liabilities===0 && equity===0){
+              mini.style.display = 'none';
+            } else {
+              mini.style.display = 'block';
+              mini.innerHTML = `<div style="padding:12px"><div style="font-weight:600">总资产 ${toCurrency(assets)}</div><div class="muted">总负债 ${toCurrency(liabilities)} · 所有者权益 ${toCurrency(equity)}</div></div>`;
+            }
+          }
+        }catch(e){ console.error('mini-balance update', e); }
+        const sections = [
+          {title:'资产（Assets）', items: data.assets || []},
+          {title:'负债（Liabilities）', items: data.liabilities || []},
+          {title:'所有者权益（Equity）', items: data.equity || []}
+        ];
+        let html = '';
+        let csvRows = [];
+        sections.forEach(sec=>{
+          if(!sec.items || sec.items.length === 0){
+            html += `<h4>${sec.title}</h4><div class="status-pending">暂无数据</div>`;
+            return;
+          }
+          html += `<h4>${sec.title}</h4><table class="report-table"><thead><tr><th>科目代码</th><th>名称</th><th>类型</th><th style="text-align:right">金额</th></tr></thead><tbody>`;
+          sec.items.forEach(it=>{
+            html += `<tr><td>${it.accountCode||''}</td><td>${it.accountName||''}</td><td>${it.accountType||''}</td><td style="text-align:right">${toCurrency(it.amount)}</td></tr>`;
+            csvRows.push({code:it.accountCode, name:it.accountName, type:it.accountType, amount:it.amount});
+          });
+          html += '</tbody></table>';
+        });
+        el.innerHTML = html;
+        document.getElementById('btn-export-balance').onclick = ()=> exportCSV('balance-sheet.csv', ['code','name','type','amount'], csvRows);
+        document.getElementById('btn-refresh-balance').onclick = loadBalanceSheet;
+      }catch(e){ console.error('loadBalanceSheet', e); el.innerHTML = '<div class="status-error">加载失败：' + e.message + '</div>'; }
+    }
+    async function loadIncomeStatement(){
+      const el = document.getElementById('income-statement');
+      if(!el) return;
+      el.innerHTML = '<div class="status-pending">加载中...</div>';
+      try{
+        const resp = await fetch('/api/reports/income-statement', {credentials:'include'});
+        if(!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        console.debug('loadIncomeStatement response', data);
+        // update mini-income overview and hide if empty to avoid large blank area
+        try{
+          const mini = document.getElementById('mini-income');
+          if(mini){
+            const incomesTotal = (data.incomes || []).reduce((s,i)=>s+Number(i.amount||0),0);
+            const expensesTotal = (data.expenses || []).reduce((s,i)=>s+Number(i.amount||0),0);
+            if(incomesTotal===0 && expensesTotal===0){
+              mini.style.display = 'none';
+            } else {
+              mini.style.display = 'block';
+              mini.innerHTML = `<div style="padding:12px"><div style="font-weight:600">本期收入 ${toCurrency(incomesTotal)}</div><div class="muted">本期费用 ${toCurrency(expensesTotal)}</div></div>`;
+            }
+          }
+        }catch(e){ console.error('mini-income update', e); }
+        const sections = [
+          {title:'收入（Incomes）', items: data.incomes || []},
+          {title:'费用（Expenses）', items: data.expenses || []}
+        ];
+        let html = '';
+        let csvRows = [];
+        sections.forEach(sec=>{
+          if(!sec.items || sec.items.length === 0){
+            html += `<h4>${sec.title}</h4><div class="status-pending">暂无数据</div>`;
+            return;
+          }
+          html += `<h4>${sec.title}</h4><table class="report-table"><thead><tr><th>科目代码</th><th>名称</th><th>类型</th><th style="text-align:right">金额</th></tr></thead><tbody>`;
+          sec.items.forEach(it=>{
+            html += `<tr><td>${it.accountCode||''}</td><td>${it.accountName||''}</td><td>${it.accountType||''}</td><td style="text-align:right">${toCurrency(it.amount)}</td></tr>`;
+            csvRows.push({code:it.accountCode, name:it.accountName, type:it.accountType, amount:it.amount});
+          });
+          html += '</tbody></table>';
+        });
+        el.innerHTML = html;
+        document.getElementById('btn-export-income').onclick = ()=> exportCSV('income-statement.csv', ['code','name','type','amount'], csvRows);
+        document.getElementById('btn-refresh-income').onclick = loadIncomeStatement;
+      }catch(e){ console.error('loadIncomeStatement', e); el.innerHTML = '<div class="status-error">加载失败：' + e.message + '</div>'; }
+    }
+    async function loadTrialBalance(){
+      const el = document.getElementById('trial-balance');
+      if(!el) return;
+      el.innerHTML = '<div class="status-pending">加载中...</div>';
+      try{
+        const resp = await fetch('/api/reports/trial-balance', {credentials:'include'});
+        if(!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        console.debug('loadTrialBalance response', data);
+        const rows = data.rows || [];
+        if(rows.length === 0){ el.innerHTML = '<div class="status-pending">暂无试算平衡数据。</div>'; return; }
+        let html = '<table class="report-table"><thead><tr><th>科目代码</th><th>名称</th><th style="text-align:right">借方</th><th style="text-align:right">贷方</th></tr></thead><tbody>';
+        const csvRows = [];
+        rows.forEach(r=>{
+          html += `<tr><td>${r.accountCode||''}</td><td>${r.accountName||''}</td><td style="text-align:right">${toCurrency(r.debit)}</td><td style="text-align:right">${toCurrency(r.credit)}</td></tr>`;
+          csvRows.push({code:r.accountCode, name:r.accountName, debit:r.debit, credit:r.credit});
+        });
+        html += `<tr><th colspan="2">合计</th><th style="text-align:right">${toCurrency(data.totalDebit)}</th><th style="text-align:right">${toCurrency(data.totalCredit)}</th></tr>`;
+        html += '</tbody></table>';
+        el.innerHTML = html;
+        document.getElementById('btn-export-trial').onclick = ()=> exportCSV('trial-balance.csv', ['code','name','debit','credit'], csvRows);
+        document.getElementById('btn-refresh-trial').onclick = loadTrialBalance;
+      }catch(e){ console.error('loadTrialBalance', e); el.innerHTML = '<div class="status-error">加载失败：' + e.message + '</div>'; }
+    }
+    // ===== 员工管理：加载管理员可见的员工列表 =====
+    async function loadEmployees(){
+      const container = document.getElementById('employees-list');
+      if(!container) return;
+      container.innerHTML = '加载中...';
+      try{
+        const r = await fetch('/api/auth/users', {credentials:'include'});
+        if(r.status === 401){
+          container.innerHTML = '<div class="muted">请登录以查看员工列表。</div>';
+          return;
+        }
+        if(r.status === 403){
+          container.innerHTML = '<div class="muted">权限不足：仅管理员可查看员工列表。</div>';
+          return;
+        }
+        if(!r.ok){
+          container.innerHTML = `<div class="muted">加载失败：HTTP ${r.status}</div>`;
+          return;
+        }
+        const users = await r.json();
+        if(!users || users.length === 0){
+          container.innerHTML = '<div class="muted">暂无员工账户。</div>';
+          return;
+        }
+        let html = '<table><thead><tr><th>ID</th><th>用户名</th><th>真实姓名</th><th>角色</th><th>启用</th><th>操作</th></tr></thead><tbody>';
+        users.forEach(u=>{
+          html += `<tr><td>${u.id}</td><td>${u.username}</td><td>${u.realName||''}</td><td>${u.role||''}</td><td>${u.enabled? '是' : '否'}</td><td>${u.role!=='ROLE_ADMIN' ? `<button class="btn btn-del" data-id="${u.id}">删除</button>` : ''}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+        // attach delete handlers
+        container.querySelectorAll('.btn-del').forEach(b=>{
+          b.addEventListener('click', async ()=>{
+            const id = b.dataset.id;
+            if(!confirm('确认删除此账号？此操作不可撤销')) return;
+            try{
+              const d = await fetch('/api/auth/users/' + id, {method:'DELETE', credentials:'include'});
+              if(d.status === 204){
+                loadEmployees();
+              } else {
+                const txt = await d.text().catch(()=> '');
+                alert('删除失败：HTTP ' + d.status + (txt ? ' - ' + txt : ''));
+              }
+            }catch(e){ alert('删除异常'); console.error(e); }
+          });
+        });
+      }catch(e){
+        console.error('loadEmployees', e);
+        container.innerHTML = '<div class="muted">加载员工列表失败。</div>';
+      }
+    }
+    // ===== 采购管理：前端交互 =====
+    // helper to find first existing element by multiple ids (support index/accountant pages)
+    function findEl(...ids){
+      for(const id of ids){
+        const e = document.getElementById(id);
+        if(e) return e;
+      }
+      return null;
+    }
+    async function loadSuppliers(q){
+      try{
+        const url = '/api/purchase/suppliers' + (q ? ('?q=' + encodeURIComponent(q)) : '');
+        const r = await fetch(url, {credentials:'include'});
+        const el = findEl('sup-list','acct-sup-list');
+        if(!r.ok){ if(el) el.textContent = '加载失败'; return; }
+        const list = await r.json();
+        if(el){
+          if(!list || !list.length){
+            el.innerHTML = '<div class="muted">暂无供应商。<button id="sup-create-cta" class="btn-primary" style="margin-left:8px">去创建供应商</button></div>';
+            const cta = document.getElementById('sup-create-cta');
+            if(cta) cta.addEventListener('click', () => {
+              const nameInput = findEl('sup-name','acct-sup-name');
+              if(nameInput){ nameInput.focus(); nameInput.scrollIntoView({behavior:'smooth', block:'center'}); }
+            });
+          } else {
+            el.innerHTML = '<table><thead><tr><th>名称</th><th>地点</th><th>邮箱</th><th>商品</th><th>单价</th></tr></thead><tbody>' + (list.map(s=>`<tr><td>${s.name}</td><td>${s.location||''}</td><td>${s.email||''}</td><td>${s.productName||''}</td><td style="text-align:right">${Number(s.unitPrice||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join('')) + '</tbody></table>';
+          }
+        }
+        // populate supplier select (supports both index and accountant pages)
+        const sel = findEl('po-supplier','acct-po-supplier');
+        if(sel){
+          sel.innerHTML = '<option value="">请选择供应商</option>';
+          list.forEach(s=>{ const o = document.createElement('option'); o.value = s.id; o.textContent = s.name + ' / ' + s.productName; sel.appendChild(o); });
+        }
+      }catch(e){
+        console.error(e);
+        const el = findEl('sup-list','acct-sup-list');
+        if(el) el.textContent = '异常';
+      }
+    }
+    // attach to search/create buttons if present on either page
+    const btnSupSearch = findEl('btn-sup-search','acct-btn-sup-search');
+    if(btnSupSearch) btnSupSearch.addEventListener('click', ()=> loadSuppliers((findEl('sup-q','acct-sup-q')||{value:''}).value));
+    const btnCreateSup = findEl('btn-create-sup','acct-btn-create-sup');
+    if(btnCreateSup) btnCreateSup.addEventListener('click', async ()=>{
+      const req = {
+        name: (findEl('sup-name','acct-sup-name')||{value:''}).value,
+        location: (findEl('sup-location','acct-sup-location')||{value:''}).value,
+        email: (findEl('sup-email','acct-sup-email')||{value:''}).value,
+        productName: (findEl('sup-product','acct-sup-product')||{value:''}).value,
+        unitPrice: Number((findEl('sup-price','acct-sup-price')||{value:0}).value || 0)
+      };
+      try{
+        const r = await fetch('/api/purchase/suppliers', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(req)});
+        if(!r.ok){ alert('创建供应商失败'); return; }
+        alert('创建成功');
+        loadSuppliers('');
+      }catch(e){ alert('异常'); console.error(e); }
+    });
+
+    let __editingPurchaseId = null;
+    // submit button may have different ids on index/accountant pages
+    const submitPoBtn = findEl('btn-submit-po','acct-btn-submit-po');
+    function resetPoForm(){
+      __editingPurchaseId = null;
+      if(submitPoBtn) submitPoBtn.textContent = '提交采购单';
+      const prod = findEl('po-product','acct-po-product');
+      const qty = findEl('po-qty','acct-po-qty');
+      const sup = findEl('po-supplier','acct-po-supplier');
+      if(prod) prod.value = '';
+      if(qty) qty.value = '';
+      if(sup) sup.value = '';
+    }
+    if(submitPoBtn) submitPoBtn.addEventListener('click', async ()=>{
+      const prodEl = findEl('po-product','acct-po-product');
+      const qtyEl = findEl('po-qty','acct-po-qty');
+      const supEl = findEl('po-supplier','acct-po-supplier');
+      const req = {
+        productName: prodEl ? prodEl.value : '',
+        supplierId: Number(supEl ? supEl.value : 0),
+        quantity: Number(qtyEl ? qtyEl.value : 0)
+      };
+      try{
+        let r;
+        if(__editingPurchaseId){
+          r = await fetch('/api/purchase/orders/' + __editingPurchaseId, {method:'PUT', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(req)});
+        } else {
+          r = await fetch('/api/purchase/orders', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(req)});
+        }
+        if(!r.ok){ alert('提交失败'); return; }
+        alert(__editingPurchaseId ? '更新并提交成功，等待审核' : '提交成功，等待审核');
+        resetPoForm();
+        try{ if(typeof loadMyOrders === 'function') loadMyOrders(); }catch(e){}
+        try{ if(typeof acctLoadMyOrders === 'function') acctLoadMyOrders(); }catch(e){}
+        try{ if(typeof loadPendingOrders === 'function') loadPendingOrders(); }catch(e){}
+      }catch(e){ alert('异常'); console.error(e); }
+    });
+
+    async function loadMyOrders(){
+      try{
+        const r = await fetch('/api/purchase/orders/my', {credentials:'include'});
+        const el = findEl('my-orders','acct-my-orders');
+        if(!r.ok){ if(el) el.textContent = '加载失败'; return; }
+        const list = await r.json();
+        if(!el) return;
+        if(!list.length) { el.innerHTML = '<div class="muted">暂无采购单</div>'; return; }
+        el.innerHTML = '<table class="report-table"><thead><tr><th>ID</th><th>商品</th><th>供应商ID</th><th>数量</th><th>单价</th><th>状态</th><th>审核人</th><th>审核时间</th><th>驳回原因</th><th>操作</th></tr></thead><tbody>' + list.map(o=>`<tr><td>${o.id}</td><td>${o.productName}</td><td>${o.supplierId}</td><td>${o.quantity}</td><td style="text-align:right">${Number(o.unitPrice||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td>${o.status}</td><td>${o.reviewedBy||''}</td><td>${o.reviewedAt? new Date(o.reviewedAt).toLocaleString() : ''}</td><td>${o.rejectionReason||''}</td><td>${o.status==='REJECTED' ? '<button class="btn btn-resubmit" data-id="'+o.id+'">编辑并重提交</button>' : ''} <button class="btn btn-history" data-id="${o.id}">查看历史</button></td></tr>`).join('') + '</tbody></table>';
+        el.querySelectorAll('.btn-resubmit').forEach(b=> b.addEventListener('click', ()=> {
+          const id = b.dataset.id;
+          // prefill fields for editing — set editing id
+          const ord = list.find(x=>x.id==id);
+          if(!ord) return;
+          const prod = findEl('po-product','acct-po-product');
+          const qty = findEl('po-qty','acct-po-qty');
+          const sup = findEl('po-supplier','acct-po-supplier');
+          if(prod) prod.value = ord.productName;
+          if(qty) qty.value = ord.quantity;
+          if(sup) sup.value = ord.supplierId;
+          __editingPurchaseId = id;
+          if(submitPoBtn) submitPoBtn.textContent = '更新并提交';
+        }));
+        el.querySelectorAll('.btn-history').forEach(b=> b.addEventListener('click', ()=> {
+          const id = b.dataset.id;
+          showPurchaseHistory(id);
+        }));
+      }catch(e){ console.error(e); const el=findEl('my-orders','acct-my-orders'); if(el) el.textContent = '异常'; }
+    }
+
+    async function loadPendingOrders(){
+      try{
+        const r = await fetch('/api/purchase/orders/pending', {credentials:'include'});
+        const container = document.getElementById('pending-orders');
+        if(r.status === 401){
+          if(container) container.innerHTML = '<div class="muted">请登录后查看待审核采购单（管理员可见）。</div>';
+          return;
+        }
+        if(r.status === 403){
+          if(container) container.innerHTML = '<div class="muted">权限不足：仅管理员可查看待审核采购单。</div>';
+          return;
+        }
+        if(!r.ok){ if(container) container.textContent = '加载失败'; return; }
+        const list = await r.json();
+        const el = document.getElementById('pending-orders');
+        console.debug('loadPendingOrders result count=', list.length);
+        if(!list.length){
+          el.innerHTML = '<div class="muted">暂无待审核采购单</div>';
+          el.style.display = 'block';
+          el.style.minHeight = '56px';
+          el.style.padding = '12px';
+          return;
+        }
+        el.innerHTML = '<table class="report-table"><thead><tr><th>ID</th><th>申请人</th><th>商品</th><th>供应商ID</th><th>数量</th><th>审核人</th><th>审核时间</th><th>驳回原因</th><th>操作</th></tr></thead><tbody>' + list.map(o=>`<tr><td>${o.id}</td><td>${o.createdBy}</td><td>${o.productName}</td><td>${o.supplierId}</td><td>${o.quantity}</td><td>${o.reviewedBy||''}</td><td>${o.reviewedAt? new Date(o.reviewedAt).toLocaleString() : ''}</td><td>${o.rejectionReason||''}</td><td><button class="btn btn-approve" data-id="${o.id}">通过</button> <button class="btn btn-reject" data-id="${o.id}">不通过</button> <button class="btn btn-history" data-id="${o.id}">查看历史</button></td></tr>`).join('') + '</tbody></table>';
+        el.querySelectorAll('.btn-approve').forEach(b=> b.addEventListener('click', async ()=> {
+          const id = b.dataset.id;
+          if(!confirm('确认通过此采购单？')) return;
+          const resp = await fetch('/api/purchase/orders/' + id + '/review', {method:'PUT', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({approved:true})});
+          if(resp.ok){
+            alert('已通过');
+            loadPendingOrders();
+            // refresh transactions/reconcile so the auto-created draft appears for confirmation
+            try{ if(typeof loadReconcileList === 'function'){ loadReconcileList(); loadReconcileBadge(); } }catch(e){}
+            try{ if(typeof loadAllOrders === 'function') loadAllOrders(); }catch(e){}
+            try{ if(typeof loadTodayIncomeExpense === 'function') loadTodayIncomeExpense(); }catch(e){}
+          } else alert('操作失败');
+        }));
+        el.querySelectorAll('.btn-reject').forEach(b=> b.addEventListener('click', async ()=> {
+          const id = b.dataset.id;
+          const reason = prompt('请输入不通过理由（会保存）');
+          if(reason == null) return;
+          const resp = await fetch('/api/purchase/orders/' + id + '/review', {method:'PUT', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({approved:false, reason:reason})});
+          if(resp.ok){ alert('已标记不通过'); loadPendingOrders(); } else alert('操作失败');
+        }));
+        el.querySelectorAll('.btn-history').forEach(b=> b.addEventListener('click', ()=> {
+          const id = b.dataset.id;
+          showPurchaseHistory(id);
+        }));
+      }catch(e){ console.error(e); document.getElementById('pending-orders').textContent = '异常'; }
+    }
+    // bind initial
+    (function bindPurchaseInit(){
+      // when switching to purchases tab we call load functions from showTab
+      document.querySelectorAll('.tab').forEach(t=> t.addEventListener('click', ()=> {
+        if(t.dataset.tab === 'purchases'){
+          loadSuppliers(''); loadMyOrders();
+          // show/hide admin all-orders card and load pending/all orders if admin
+          try{
+            const adminCard = document.getElementById('admin-all-orders-card');
+            if(window.__currentUser && (window.__currentUser.isAdmin || window.__currentUser.role === 'ROLE_ADMIN')){
+              if(adminCard) adminCard.style.display = 'block';
+              loadPendingOrders(); loadAllOrders();
+            } else {
+              if(adminCard) adminCard.style.display = 'none';
+              const p = document.getElementById('pending-orders');
+              if(p) p.innerHTML = '<div class="muted">仅管理员可查看待审核采购单。</div>';
+            }
+          }catch(e){ console.error('purchases tab init', e); loadPendingOrders(); }
+        }
+      }));
+    })();
+    // Purchase history modal
+    async function showPurchaseHistory(orderId){
+      let modal = document.getElementById('po-history-modal');
+      if(!modal){
+        modal = document.createElement('div');
+        modal.id = 'po-history-modal';
+        modal.style.cssText = 'display:none;position:fixed;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:2000;overflow:auto;';
+        modal.innerHTML = `<div style="background:#fff;padding:16px;border-radius:8px;width:720px;max-width:96%;max-height:80vh;overflow:auto;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <h3 style="margin:0">审核历史</h3><button id="po-history-close" class="btn">关闭</button>
+          </div>
+          <div id="po-history-body">加载中...</div>
+        </div>`;
+        document.body.appendChild(modal);
+        document.getElementById('po-history-close').addEventListener('click', ()=> modal.style.display='none');
+      }
+      modal.style.display = 'flex';
+      const body = document.getElementById('po-history-body');
+      body.innerHTML = '加载中...';
+      try{
+        const resp = await fetch('/api/purchase/orders/' + orderId + '/audits', {credentials:'include'});
+        if(!resp.ok){
+          const txt = await resp.text().catch(()=>'');
+          body.innerHTML = `<div class="muted">加载失败：HTTP ${resp.status} ${escapeHtml(txt)}</div>`;
+          return;
+        }
+        const list = await resp.json();
+        if(!list || !list.length){ body.innerHTML = '<div class="muted">暂无历史记录</div>'; return; }
+        let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>时间</th><th>动作</th><th>操作者</th><th>说明</th></tr></thead><tbody>';
+        list.forEach(it=>{
+          html += `<tr><td style="padding:8px">${new Date(it.createdAt).toLocaleString()}</td><td style="padding:8px">${escapeHtml(it.action)}</td><td style="padding:8px">${escapeHtml(it.actor)}</td><td style="padding:8px">${escapeHtml(it.comment || '')}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        body.innerHTML = html;
+      }catch(e){
+        body.innerHTML = `<div class="muted">加载失败：${escapeHtml(e.message || String(e))}</div>`;
+        console.error(e);
+      }
+    }
+    // Admin: orders history modal
+    function showOrdersHistory(){
+      let modal = document.getElementById('orders-history-modal');
+      if(!modal){
+        modal = document.createElement('div');
+        modal.id = 'orders-history-modal';
+        modal.style.cssText = 'display:none;position:fixed;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:2000;overflow:auto;';
+        modal.innerHTML = `<div style="background:#fff;padding:16px;border-radius:8px;width:900px;max-width:96%;max-height:80vh;overflow:auto;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <h3 style="margin:0">历史订单</h3><button id="orders-history-close" class="btn">关闭</button>
+          </div>
+          <div id="orders-history-body">加载中...</div>
+        </div>`;
+        document.body.appendChild(modal);
+        document.getElementById('orders-history-close').addEventListener('click', ()=> modal.style.display='none');
+      }
+      modal.style.display = 'flex';
+      const body = document.getElementById('orders-history-body');
+      body.innerHTML = '加载中...';
+      fetch('/api/purchase/orders/all', {credentials:'include'}).then(r => {
+        if(!r.ok) return Promise.reject(r.status);
+        return r.json();
+      }).then(list=>{
+        if(!list || !list.length){ body.innerHTML = '<div class="muted">暂无历史订单</div>'; return; }
+        let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>ID</th><th>申请人</th><th>商品</th><th>供应商ID</th><th>数量</th><th>状态</th><th>审核人</th><th>审核时间</th></tr></thead><tbody>';
+        list.forEach(o=>{
+          html += `<tr><td style="padding:8px">${o.id}</td><td style="padding:8px">${o.createdBy}</td><td style="padding:8px">${o.productName}</td><td style="padding:8px">${o.supplierId}</td><td style="padding:8px">${o.quantity}</td><td style="padding:8px">${o.status}</td><td style="padding:8px">${o.reviewedBy||''}</td><td style="padding:8px">${o.reviewedAt? new Date(o.reviewedAt).toLocaleString() : ''}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        body.innerHTML = html;
+      }).catch(e=> { body.innerHTML = '<div class="muted">加载失败</div>'; console.error(e); });
+    }
+
+    // removed top-level "查看历史订单" button listener (button removed)
+    // load all orders inline for admin
+    async function loadAllOrders(){
+      try{
+        const r = await fetch('/api/purchase/orders/all', {credentials:'include'});
+        if(!r.ok){
+          document.getElementById('all-orders').textContent = '加载失败';
+          return;
+        }
+        const list = await r.json();
+        const el = document.getElementById('all-orders');
+        if(!list.length){ el.innerHTML = '<div class="muted">暂无历史订单</div>'; return; }
+        let html = '<table class="report-table"><thead><tr><th>ID</th><th>申请人</th><th>商品</th><th>供应商ID</th><th>数量</th><th>状态</th><th>审核人</th><th>审核时间</th></tr></thead><tbody>';
+        list.forEach(o=>{
+          html += `<tr><td>${o.id}</td><td>${o.createdBy}</td><td>${o.productName}</td><td>${o.supplierId}</td><td>${o.quantity}</td><td>${o.status}</td><td>${o.reviewedBy||''}</td><td>${o.reviewedAt? new Date(o.reviewedAt).toLocaleString() : ''}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        el.innerHTML = html;
+      }catch(e){ console.error(e); document.getElementById('all-orders').textContent = '异常'; }
+    }
+    function addSplitRow(){
+      const tbody = document.getElementById('splits-tbody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><select class="acc"></select></td>
+                      <td><select class="dir"><option value="DEBIT">借</option><option value="CREDIT">贷</option></select></td>
+                      <td><input class="amt" type="number" step="0.01"></td>
+                      <td><button class="btn remove">移除</button></td>`;
+      tbody.appendChild(tr);
+      const sel = tr.querySelector('.acc');
+      accounts.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=`${a.code} ${a.name}`; sel.appendChild(o);});
+      tr.querySelector('.remove').addEventListener('click', ()=> tr.remove());
+    }
+    document.getElementById('add-split').addEventListener('click', addSplitRow);
+    // simple HTML escaper
+    function escapeHtml(str){
+      return String(str||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+    }
+
+    document.getElementById('submit-tx').addEventListener('click', async ()=>{
+      const dateRaw = document.getElementById('tx-date').value;
+      const date = dateRaw ? new Date(dateRaw).toISOString() : null;
+      const desc = document.getElementById('tx-desc').value;
+      const ref = document.getElementById('tx-ref').value;
+      const splits = Array.from(document.querySelectorAll('#splits-tbody tr')).map(tr=>({
+        accountId: Number(tr.querySelector('.acc').value),
+        direction: tr.querySelector('.dir').value,
+        amount: Number(tr.querySelector('.amt').value)
+      }));
+      const payload = {tradeDate:date, description:desc, reference:ref, splits};
+      try{
+        const r = await fetch('/api/transactions', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+        if(!r.ok){ const t=await r.text(); document.getElementById('tx-result').textContent='提交失败: '+t; return; }
+        const j = await r.json();
+        document.getElementById('tx-result').textContent = '提交成功，ID: '+j.id;
+        loadReconcileBadge(); loadReconcileList();
+      }catch(e){ document.getElementById('tx-result').textContent='提交异常'; }
+    });
+    // transaction history modal for admins
+    (function(){
+      var histModal, histBody;
+      function ensureHistModal(){
+        if(histModal) return;
+        histModal = document.createElement('div');
+        histModal.id = 'tx-history-modal';
+        histModal.style.cssText = 'display:none;position:fixed;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:2000;overflow:auto;';
+        histModal.innerHTML = `<div style="background:#fff;padding:16px;border-radius:10px;width:900px;max-width:96%;max-height:80vh;overflow:auto;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <h3 style="margin:0">已审批交易历史</h3><button id="tx-history-close" class="btn">关闭</button>
+          </div>
+          <div style="margin-bottom:8px"><input id="tx-hist-q" placeholder="按摘要/参考号搜索" style="width:60%;padding:8px;border-radius:6px;border:1px solid var(--border)"/> <button id="tx-hist-search" class="btn">搜索</button></div>
+          <div id="tx-history-body">加载中...</div>
+        </div>`;
+        document.body.appendChild(histModal);
+        document.getElementById('tx-history-close').addEventListener('click', ()=> histModal.style.display='none');
+        histBody = document.getElementById('tx-history-body');
+        document.getElementById('tx-hist-search').addEventListener('click', ()=> loadTxHistory(0));
+      }
+
+      var __txHistoryState = { page: 0, size: 50, totalPages: 0, totalElements: 0 };
+      async function loadTxHistory(page){
+        try{
+          ensureHistModal();
+          histBody.innerHTML = '加载中...';
+          var q = document.getElementById('tx-hist-q').value.trim();
+          var url;
+          if(window.__currentUser && (window.__currentUser.isAdmin || window.__currentUser.role === 'ROLE_ADMIN')){
+            url = '/api/transactions/history?page=' + (page||0) + '&size=50' + (q ? ('&search=' + encodeURIComponent(q)) : '');
+          } else {
+            url = '/api/transactions/history/mine?page=' + (page||0) + '&size=50' + (q ? ('&search=' + encodeURIComponent(q)) : '');
+          }
+          var r = await fetch(url, {credentials:'include'});
+          if(!r.ok){ histBody.innerHTML = '加载失败：' + r.status; return; }
+          var j = await r.json();
+          // update paging state
+          __txHistoryState.page = j.number || (page || 0);
+          __txHistoryState.size = j.size || __txHistoryState.size;
+          __txHistoryState.totalPages = j.totalPages || 0;
+          __txHistoryState.totalElements = j.totalElements || (j.total || 0);
+
+          var rows = j.content || j;
+          if(!rows || rows.length === 0){ histBody.innerHTML = '<div class="muted">暂无已审批交易</div>'; return; }
+          var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div><strong>共 ' + (__txHistoryState.totalElements || rows.length) + ' 条</strong></div><div id="tx-history-pager"></div></div>';
+          html += '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>ID</th><th>日期</th><th>摘要</th><th>参考号</th><th style="text-align:right">金额合计</th><th>分录预览</th><th>创建人</th><th>驳回人</th><th>操作</th></tr></thead><tbody>';
+          rows.forEach(t => {
+            // compute total amount from splits
+            var totalAmt = 0;
+            var splitsPreview = '';
+            try {
+              if(t.splits && t.splits.length){
+                t.splits.forEach(function(s, idx){
+                  var amt = Number(s.amount || 0);
+                  totalAmt += amt;
+                  if(idx < 2){
+                    var acct = (s.accountCode ? s.accountCode + ' ' : '') + (s.accountName || '');
+                    splitsPreview += acct + ' ' + (s.direction || '') + ' ' + Number(amt).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + (idx < 1 && t.splits.length > 2 ? ' ; ' : '');
+                  }
+                });
+                if(t.splits.length > 2) splitsPreview += ' ...';
+              }
+            } catch(e){}
+            html += `<tr><td style="padding:8px">${t.id}</td><td style="padding:8px">${t.tradeDate ? t.tradeDate.split('T')[0] : ''}</td><td style="padding:8px">${escapeHtml(t.description||'')}</td><td style="padding:8px">${escapeHtml(t.reference||'')}</td><td style="padding:8px;text-align:right">¥ ${Number(totalAmt||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td style="padding:8px">${escapeHtml(splitsPreview||'')}</td><td style="padding:8px">${escapeHtml(t.operator||t.createdBy||'')}</td><td style="padding:8px">${escapeHtml(t.rejectedBy||'')}</td><td style="padding:8px"><button class="btn btn-view" data-id="${t.id}">查看</button></td></tr>`;
+          });
+          html += '</tbody></table>';
+          // pager controls
+          html += `<div style="margin-top:8px;display:flex;justify-content:center;gap:8px"><button id="tx-prev" class="btn">上一页</button><div class="muted" style="padding:8px">第 ${(__txHistoryState.page + 1)} 页 / 共 ${__txHistoryState.totalPages} 页</div><button id="tx-next" class="btn">下一页</button></div>`;
+          histBody.innerHTML = html;
+          histBody.querySelectorAll('.btn-view').forEach(b=> b.addEventListener('click', ()=> { var id = b.dataset.id; window.__openApproveModal && window.__openApproveModal(id); histModal.style.display='none'; }));
+          // attach pager handlers
+          var prev = document.getElementById('tx-prev'), next = document.getElementById('tx-next');
+          if(prev) prev.addEventListener('click', function(){ if(__txHistoryState.page > 0) loadTxHistory(__txHistoryState.page - 1); });
+          if(next) next.addEventListener('click', function(){ if(__txHistoryState.page + 1 < __txHistoryState.totalPages) loadTxHistory(__txHistoryState.page + 1); });
+        }catch(e){ console.error(e); if(histBody) histBody.innerHTML = '<div class="muted">加载异常</div>'; }
+      }
+
+      document.getElementById('open-tx-history').addEventListener('click', async ()=>{
+        ensureHistModal();
+        document.getElementById('tx-history-body').innerHTML = '加载中...';
+        await loadTxHistory(0);
+        histModal.style.display = 'flex';
+      });
+      // inline history for admins: load into #tx-history-inline-body
+      async function loadTxHistoryInline(page){
+        try{
+          var q = document.getElementById('tx-inline-q').value.trim();
+          var url = '/api/transactions/history?page=' + (page||0) + '&size=20' + (q ? ('&search=' + encodeURIComponent(q)) : '');
+          console.debug('loadTxHistoryInline fetching', url);
+          var r = await fetch(url, {credentials:'include'});
+          console.debug('loadTxHistoryInline response', r.status, r.ok, r.headers.get('content-type'));
+          if(!r.ok){
+            var txt = await r.text().catch(()=>'');
+            document.getElementById('tx-history-inline-body').textContent = '加载失败：' + r.status + (txt ? (' - ' + txt) : '');
+            return;
+          }
+          const ct = r.headers.get('content-type') || '';
+          if(!ct.includes('application/json')){
+            const txt = await r.text().catch(()=>'');
+            console.warn('Expected JSON but got', ct, txt);
+            document.getElementById('tx-history-inline-body').textContent = '加载失败：后端返回非 JSON 响应';
+            return;
+          }
+          var j = null;
+          try {
+            j = await r.json();
+            console.debug('loadTxHistoryInline json', j);
+          } catch(parseErr){
+            console.error('Failed to parse history JSON', parseErr);
+            document.getElementById('tx-history-inline-body').textContent = '加载失败：解析响应异常';
+            return;
+          }
+          var rows = j.content || j;
+          if(!rows || rows.length === 0){ document.getElementById('tx-history-inline-body').innerHTML = '<div class="muted">暂无已审批交易</div>'; return; }
+          var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>ID</th><th>日期</th><th>摘要</th><th>参考号</th><th style="text-align:right">金额</th><th>创建人</th><th>驳回人</th><th>操作</th></tr></thead><tbody>';
+          rows.forEach(t=>{
+            var total = 0;
+            var preview = '';
+            try{ if(t.splits && t.splits.length){ t.splits.forEach(s=> total += Number(s.amount || 0)); } }catch(e){}
+            html += `<tr><td style="padding:6px">${t.id}</td><td style="padding:6px">${t.tradeDate? t.tradeDate.split('T')[0]:''}</td><td style="padding:6px">${escapeHtml(t.description||'')}</td><td style="padding:6px">${escapeHtml(t.reference||'')}</td><td style="padding:6px;text-align:right">¥ ${Number(total||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td style="padding:6px">${escapeHtml(t.operator||t.createdBy||'')}</td><td style="padding:6px">${escapeHtml(t.rejectedBy||'')}</td><td style="padding:6px"><button class="btn btn-view-inline" data-id="${t.id}">查看</button></td></tr>`;
+          });
+          html += '</tbody></table>';
+          // simple pager
+          var pageNum = j.number || 0;
+          var totalPages = j.totalPages || 1;
+          html += `<div style="margin-top:8px;display:flex;justify-content:center;align-items:center;gap:8px"><button id="inline-prev" class="btn">上一页</button><div class="muted">第 ${pageNum+1} 页 / 共 ${totalPages} 页</div><button id="inline-next" class="btn">下一页</button></div>`;
+          document.getElementById('tx-history-inline-body').innerHTML = html;
+          document.querySelectorAll('.btn-view-inline').forEach(b=> b.addEventListener('click', ()=> { var id=b.dataset.id; window.__openApproveModal && window.__openApproveModal(id); }));
+          document.getElementById('inline-prev').addEventListener('click', ()=> { if(pageNum>0) loadTxHistoryInline(pageNum-1); });
+          document.getElementById('inline-next').addEventListener('click', ()=> { if(pageNum+1< totalPages) loadTxHistoryInline(pageNum+1); });
+        }catch(e){ console.error(e); document.getElementById('tx-history-inline-body').textContent='加载异常'; }
+      }
+      document.getElementById('tx-inline-search').addEventListener('click', ()=> loadTxHistoryInline(0));
+      // expose for external calls (init)
+      window.loadTxHistoryInline = loadTxHistoryInline;
+    })();
+
+    // 对账与驳回计数
+    async function loadReconcileBadge(){
+      try{
+        const r = await fetch('/api/transactions/rejected/count', {credentials:'include'});
+        if(!r.ok) return;
+        const json = await r.json();
+        const count = Number(json.count || 0);
+        const badge = document.getElementById('reconcile-badge');
+        badge.innerHTML = count ? `<span class="badge">${count}</span>` : '';
+        // notification handled in accountant page; do not show toast here.
+      }catch(e){}
+    }
+
+    
+    // 打开驳回理由模态（供审核弹窗调用）
+    function openRejectReasonModal(txId){
+      const modal = document.getElementById('reject-reason-modal');
+      if(!modal) return;
+      modal.dataset.txId = txId;
+      const ta = document.getElementById('reject-reason-text');
+      if(ta){ ta.value = ''; document.getElementById('reject-reason-count').textContent = '0 / 500'; }
+      modal.style.display = 'flex';
+    }
+    async function loadReconcileList(){
+      try{
+        const r = await fetch('/api/transactions/reconcile?page=0&size=50', {credentials:'include'});
+        if(!r.ok){
+          const txt = await r.text().catch(()=> '');
+          document.getElementById('reconcile-list').textContent='加载失败：HTTP ' + r.status + (txt ? (' - ' + txt) : '');
+          return;
+        }
+        const j = await r.json();
+        const rows = (j.content || j);
+        let html = '<table><thead><tr><th>ID</th><th>日期</th><th>摘要</th><th>操作</th></tr></thead><tbody>';
+        rows.forEach(tx=> html += `<tr><td>${tx.id}</td><td>${tx.tradeDate?tx.tradeDate.split('T')[0]:''}</td><td>${tx.description||''}</td><td><button class="btn" onclick="openApprove(${tx.id})">查看/审核</button></td></tr>`);
+        html += '</tbody></table>';
+        document.getElementById('reconcile-list').innerHTML = html;
+      }catch(e){ document.getElementById('reconcile-list').textContent='异常：' + e.message; console.error(e); }
+    }
+
+    // admin: poll reconcile list periodically and show simple toast for new submissions
+    let __lastReconcileIds = [];
+    function showAdminToast(msg){
+      let t = document.getElementById('admin-toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'admin-toast';
+        t.style.cssText = 'position:fixed;right:20px;top:80px;background:#fff;border:1px solid rgba(2,6,23,0.08);padding:12px 14px;border-radius:8px;box-shadow:0 10px 30px rgba(2,6,23,0.08);z-index:1600;max-width:360px;';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(()=> t.style.display='none', 6000);
+    }
+
+    async function pollReconcileChanges(){
+      try{
+        const r = await fetch('/api/transactions/reconcile?page=0&size=50', {credentials:'include'});
+        if(!r.ok) return;
+        const j = await r.json();
+        const rows = j.content || j;
+        const ids = rows.map(x=>x.id).filter(Boolean);
+        // detect new ids
+        for(const id of ids){
+          if(!__lastReconcileIds.includes(id)){
+            // new transaction submitted — notify admin
+            const tx = rows.find(x=>x.id===id);
+            showAdminToast(`新提交交易 ${id} ${tx && tx.operator ? '来自：' + tx.operator : ''}`);
+            break;
+          }
+        }
+        __lastReconcileIds = ids;
+      }catch(e){}
+    }
+    // start polling every 12s
+    setInterval(pollReconcileChanges, 12000);
+    // Admin SSE: subscribe to server push for resubmission notifications
+    function initAdminSSE(){
+      try{
+        if(typeof(EventSource) === 'undefined') return;
+        // preflight with fetch to avoid browser "Failed to load" console noise when server responds 401/redirect
+        fetch('/api/notifications/subscribe', {credentials:'include', method:'GET', headers: { Accept: 'text/event-stream' }})
+          .then(r=>{
+            if(!r.ok){
+              console.warn('SSE preflight failed', r.status);
+              return;
+            }
+            const ct = r.headers.get('content-type') || '';
+            if(!ct.includes('text/event-stream')){
+              console.warn('SSE preflight content-type not event-stream', ct);
+              return;
+            }
+            // now create EventSource — allow browser to reuse credentials/cookies
+            const es = new EventSource('/api/notifications/subscribe');
+            es.addEventListener('transaction_resubmitted', e=>{
+              try{
+                const d = JSON.parse(e.data || '{}');
+                const id = d.transactionId || '';
+                const who = d.submittedBy || d.submittedByName || '';
+                showAdminToast(`交易 ${id} 已由 ${who || '会计'} 重新提交`);
+                // refresh reconcile list to show updated status
+                loadReconcileList(); loadReconcileBadge();
+              }catch(err){ console.error('admin sse parse err', err); }
+            });
+            es.onerror = function(err){ /* silent */ };
+          })
+          .catch(err=>{
+            console.warn('SSE preflight fetch error', err);
+          });
+      }catch(e){ console.error('initAdminSSE failed', e); }
+    }
+    // 审核/驳回简易弹窗
+    async function openApprove(id){
+      if(window.__openApproveModal){
+        window.__openApproveModal(id);
+        return;
+      }
+      // fallback to old behavior if modal not available
+      try{
+        const r = await fetch('/api/transactions/'+id, {credentials:'include'});
+        if(!r.ok){
+          const txt = await r.text().catch(()=>'');
+          alert('无法加载交易：HTTP ' + r.status + (txt ? ' - ' + txt : ''));
+          return;
+        }
+        const tx = await r.json();
+        const ok = confirm(`交易 ${tx.id}\\n摘要: ${tx.description||''}\\n确认通过？取消为驳回`);
+        if(ok){
+          await fetch(`/api/transactions/${id}/approve?approved=true`, {method:'PUT'});
+          alert('已通过');
+        } else {
+          const reason = prompt('请输入驳回理由（必填）');
+          if(!reason) return;
+          await fetch(`/api/transactions/${id}/approve?approved=false&reason=`+encodeURIComponent(reason), {method:'PUT'});
+          alert('已驳回');
+        }
+        loadReconcileList(); loadReconcileBadge();
+      }catch(e){ alert('操作失败'); }
+    }
+
+    // init
+    (async function init(){
+      await loadAccounts();
+      await loadCurrentUser();
+      // try load employees if admin
+      loadEmployees();
+      // initialize admin SSE only after we've loaded current user and know roles
+      try{
+        if(isAdminUser(window.__currentUser)){
+          initAdminSSE();
+          // show tx history button for admins
+          const histBtn = document.getElementById('open-tx-history');
+          if(histBtn) histBtn.style.display = 'inline-block';
+          // show inline history panel as well and load first page
+          const inline = document.getElementById('tx-history-inline');
+          if(inline){
+            inline.style.display = 'block';
+            try{ loadTxHistoryInline(0); } catch(e){ console.error('loadTxHistoryInline error on show', e); }
+          }
+        }
+      }catch(e){ /* ignore */ }
+      addSplitRow(); addSplitRow();
+      loadReconcileBadge(); loadReconcileList();
+      // load homepage summaries and accounts table
+      await loadSummaryFromBalanceSheet();
+      await loadTodayIncomeExpense();
+      await loadAccountsTable();
+    })();
+
+    // --- 附加：创建内联审批模态、驳回输入与被驳回列表（如尚未注入） ---
+    (function ensureApproveUI(){
+      if(window.__openApproveModal) return;
+      // create approve modal
+      const approveModal = document.createElement('div');
+      approveModal.id = 'approve-modal';
+      approveModal.style.cssText = 'display:none;position:fixed;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:1400';
+      approveModal.innerHTML = `
+        <div style="background:#fff;padding:18px;border-radius:12px;width:820px;max-width:96%;box-shadow:0 18px 40px rgba(2,6,23,0.16);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <h3 id="approve-title" style="margin:0;font-size:18px;">审核交易详情</h3>
+            <button id="approve-close" class="btn" style="border:none;background:transparent;font-size:18px;">✕</button>
+          </div>
+          <div style="border:1px solid rgba(2,6,23,0.04);padding:12px;border-radius:8px;margin-bottom:12px;background:#fffdfa;">
+            <strong style="color:#b91c1c">注意：</strong>
+            <span class="muted" style="margin-left:8px">请管理员认真核对以下交易信息，确认无误后再点击“通过”。如果有问题，请点击“驳回”并填写驳回理由，要求会计重新提交。</span>
+          </div>
+          <div id="approve-body" style="max-height:420px;overflow:auto;color:#111;margin-bottom:12px;">
+            <!-- transaction summary table -->
+            <table style="width:100%;margin-bottom:10px;border-collapse:collapse;">
+              <tbody>
+                <tr><th style="text-align:left;padding:6px 8px;width:120px;color:var(--muted)">交易 ID</th><td id="approve-tx-id" style="padding:6px 8px"></td></tr>
+                <tr><th style="text-align:left;padding:6px 8px;color:var(--muted)">交易日期</th><td id="approve-tx-date" style="padding:6px 8px"></td></tr>
+                <tr><th style="text-align:left;padding:6px 8px;color:var(--muted)">摘要</th><td id="approve-tx-desc" style="padding:6px 8px"></td></tr>
+                <tr><th style="text-align:left;padding:6px 8px;color:var(--muted)">参考号</th><td id="approve-tx-ref" style="padding:6px 8px"></td></tr>
+              </tbody>
+            </table>
+            <!-- splits table -->
+            <div style="margin-top:6px;">
+              <div style="font-weight:600;margin-bottom:6px">分录明细</div>
+              <table style="width:100%;border-collapse:collapse;">
+                <thead><tr style="background:#fafafa"><th style="padding:8px;text-align:left">序号</th><th style="padding:8px;text-align:left">账户</th><th style="padding:8px;text-align:left">方向</th><th style="padding:8px;text-align:right">金额</th><th style="padding:8px;text-align:left">备注</th></tr></thead>
+                <tbody id="approve-splits-body"></tbody>
+              </table>
+            </div>
+            <!-- attachments -->
+            <div id="approve-attachments" style="margin-top:10px"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button id="approve-reject" class="btn" style="background:#fff5f5;border:1px solid #f1a1a1;color:#7f1d1d">驳回</button>
+            <button id="approve-accept" class="btn primary">通过</button>
+          </div>
+        </div>`;
+      document.body.appendChild(approveModal);
+
+      // create reject modal
+      const rejectModal = document.createElement('div');
+      rejectModal.id = 'reject-reason-modal';
+      rejectModal.style.cssText = 'display:none;position:fixed;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:1500';
+      rejectModal.innerHTML = `<div style="background:#fff;padding:18px;width:640px;max-width:96%;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,0.35);">
+        <h3 style="margin:0 0 8px">请输入驳回理由</h3>
+        <textarea id="reject-reason-text" rows="6" maxlength="500" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e5e7eb"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+          <div class="muted" id="reject-reason-count">0 / 500</div>
+                <div>
+            <button id="reject-reason-cancel" class="btn">取消</button>
+            <button id="reject-reason-submit" class="btn primary">提交驳回</button>
+                </div>
+            </div>
+      </div>`;
+      document.body.appendChild(rejectModal);
+
+      document.getElementById('approve-close').addEventListener('click', ()=> approveModal.style.display='none');
+      document.getElementById('approve-accept').addEventListener('click', async ()=>{
+        const txId = approveModal.dataset.txId;
+        try{
+          await fetch(`/api/transactions/${txId}/approve?approved=true`, {method:'PUT', credentials:'include'});
+          approveModal.style.display='none';
+          loadReconcileList(); loadReconcileBadge();
+          alert('已通过');
+        }catch(e){ alert('审批失败'); }
+      });
+      document.getElementById('approve-reject').addEventListener('click', ()=>{
+        approveModal.style.display='none';
+        openRejectReasonModal(approveModal.dataset.txId);
+      });
+
+      const txt = document.getElementById('reject-reason-text');
+      txt.addEventListener('input', function(){ document.getElementById('reject-reason-count').textContent = `${this.value.length} / 500`; });
+      document.getElementById('reject-reason-cancel').addEventListener('click', ()=> rejectModal.style.display='none');
+      document.getElementById('reject-reason-submit').addEventListener('click', async ()=>{
+        const reason = document.getElementById('reject-reason-text').value.trim();
+        if(!reason){ alert('驳回理由为必填'); return; }
+        const txId = rejectModal.dataset.txId;
+        try{
+          await fetch(`/api/transactions/${txId}/approve?approved=false&reason=`+encodeURIComponent(reason), {method:'PUT', credentials:'include'});
+          rejectModal.style.display='none';
+          document.getElementById('reject-reason-text').value = '';
+          document.getElementById('reject-reason-count').textContent = '0 / 500';
+          loadReconcileList(); loadReconcileBadge();
+          alert('已驳回并通知会计重新提交');
+        }catch(e){ alert('驳回失败'); }
+      });
+
+      window.__openApproveModal = async function(id){
+        try{
+          const r = await fetch('/api/transactions/' + id, {credentials:'include'});
+          if(!r.ok){ alert('无法加载交易'); return; }
+          const tx = await r.json();
+          // fill summary fields
+          const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v || ''; };
+          setText('approve-tx-id', tx.id);
+          setText('approve-tx-date', tx.tradeDate ? (tx.tradeDate.split('T')[0] + ' ' + (tx.tradeDate.split('T')[1]||'').split('.')[0]) : '');
+          setText('approve-tx-desc', tx.description || '');
+          setText('approve-tx-ref', tx.reference || '');
+
+          // populate splits table body
+          const splitsBody = document.getElementById('approve-splits-body');
+          if(splitsBody){
+            splitsBody.innerHTML = '';
+            (tx.splits || []).forEach((s, idx) => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `<td style="padding:8px">${idx+1}</td>
+                              <td style="padding:8px">${escapeHtml(s.accountCode || (s.account && s.account.code) || '')} ${escapeHtml(s.accountName || (s.account && s.account.name) || '')}</td>
+                              <td style="padding:8px">${escapeHtml(s.direction || '')}</td>
+                              <td style="padding:8px;text-align:right">${Number(s.amount||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                              <td style="padding:8px">${escapeHtml(s.memo || '')}</td>`;
+              splitsBody.appendChild(tr);
+            });
+          }
+
+          // populate attachments
+          const attDiv = document.getElementById('approve-attachments');
+          if(attDiv){
+            attDiv.innerHTML = '';
+            if(tx.attachments && tx.attachments.length){
+              const list = document.createElement('div');
+              list.innerHTML = '<strong style="display:block;margin-bottom:6px">附件：</strong>';
+              tx.attachments.forEach(a=>{
+                const ael = document.createElement('div');
+                ael.innerHTML = `<a href="/api/transactions/${tx.id}/attachments/${a.id}/download" target="_blank">${escapeHtml(a.originalFilename)}</a>`;
+                list.appendChild(ael);
+              });
+              attDiv.appendChild(list);
+            }
+          }
+
+          approveModal.dataset.txId = id;
+          approveModal.style.display = 'flex';
+        }catch(e){
+          console.error(e);
+          alert('打开审核失败');
+        }
+      };
+    })();
+    // Removed heavy visual charts due to performance; reports are table-based.
+
+    // --- 草稿箱 UI 和编辑模态 （管理员） ---
+    (function(){
+      // 创建悬浮按钮
+      var btn = document.createElement('button');
+      btn.id = 'open-drafts-btn';
+      btn.innerHTML = '草稿箱 <span id="drafts-badge" style="display:none;margin-left:8px;padding:2px 6px;border-radius:12px;background:#ef4444;color:#fff;font-size:12px;vertical-align:middle;"></span>';
+      btn.style.position = 'fixed';
+      btn.style.right = '20px';
+      btn.style.bottom = '80px';
+      btn.style.zIndex = 9999;
+      btn.style.padding = '14px 18px';
+      btn.style.fontSize = '16px';
+      btn.style.background = '#1976d2';
+      btn.style.color = '#fff';
+      btn.style.border = 'none';
+      btn.style.borderRadius = '8px';
+      btn.style.cursor = 'pointer';
+      document.body.appendChild(btn);
+
+      // 列表模态
+      var draftsModal = document.createElement('div');
+      draftsModal.id = 'drafts-modal';
+      draftsModal.style.display = 'none';
+      draftsModal.style.position = 'fixed';
+      draftsModal.style.left = '0';
+      draftsModal.style.top = '0';
+      draftsModal.style.width = '100%';
+      draftsModal.style.height = '100%';
+      draftsModal.style.background = 'rgba(0,0,0,0.4)';
+      draftsModal.style.zIndex = 10000;
+      draftsModal.innerHTML = '<div style="width:900px;max-width:95%;margin:60px auto;background:#fff;border-radius:8px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,0.2)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<h3 style="margin:0">交易草稿箱</h3><button id="drafts-close" style="background:#eee;border:0;padding:6px 10px;border-radius:4px;cursor:pointer">关闭</button></div>' +
+        '<div id="drafts-list" style="max-height:460px;overflow:auto;border-top:1px solid #f0f0f0;padding-top:8px"></div>' +
+        '</div>';
+      document.body.appendChild(draftsModal);
+
+      // 编辑模态（用于从草稿创建交易）
+      var editModal = document.createElement('div');
+      editModal.id = 'draft-edit-modal';
+      editModal.style.display = 'none';
+      editModal.style.position = 'fixed';
+      editModal.style.left = '0';
+      editModal.style.top = '0';
+      editModal.style.width = '100%';
+      editModal.style.height = '100%';
+      editModal.style.background = 'rgba(0,0,0,0.4)';
+      editModal.style.zIndex = 10001;
+      editModal.innerHTML = '<div style="width:900px;max-width:95%;margin:60px auto;background:#fff;border-radius:8px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,0.2)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<h3 style="margin:0">从草稿创建交易</h3><button id="edit-close" style="background:#eee;border:0;padding:6px 10px;border-radius:4px;cursor:pointer">关闭</button></div>' +
+        '<div style="margin-bottom:8px"><label>摘要:</label><div id="edit-desc" style="padding:8px;border:1px solid #ddd;border-radius:4px;background:#fafafa"></div></div>' +
+        '<div style="margin-bottom:8px"><label>金额:</label><div id="edit-amount" style="padding:8px;border:1px solid #ddd;border-radius:4px;background:#fafafa"></div></div>' +
+        '<div style="margin-bottom:8px"><label>分录（管理员填写）</label><div style="margin-top:6px"><button id="add-draft-split" style="padding:6px 8px;border-radius:4px;border:0;background:#1976d2;color:#fff;cursor:pointer">添加分录</button></div></div>' +
+        '<table style="width:100%;border-collapse:collapse;margin-top:8px"><thead><tr><th style="text-align:left">账户</th><th style="text-align:left">方向</th><th style="text-align:left">金额</th><th style="text-align:left">备注</th><th></th></tr></thead><tbody id="splits-body"></tbody></table>' +
+        '<div style="margin-top:12px;text-align:right"><button id="create-from-draft" style="padding:8px 12px;background:#388e3c;color:#fff;border:0;border-radius:6px;cursor:pointer">创建交易</button></div>' +
+        '</div>';
+      document.body.appendChild(editModal);
+
+      function renderDrafts(list){
+        var container = document.getElementById('drafts-list');
+        container.innerHTML = '';
+        if(!list || !list.length){ container.innerHTML = '<div style="padding:12px;color:#666">暂无草稿</div>'; return; }
+        list.forEach(function(d){
+          var el = document.createElement('div');
+          el.style.padding = '8px';
+          el.style.borderBottom = '1px solid #f0f0f0';
+          el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<div><strong>草稿 #' + d.id + '</strong> - PO#' + (d.purchaseOrderId||'') + '<div style="color:#666;margin-top:4px">' + (d.description||'') + '</div></div>' +
+            '<div style="text-align:right"><div style="font-weight:bold">¥ ' + (Number(d.amount||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})) + '</div>' +
+            '<div style="margin-top:6px"><button class="open-draft" data-id="'+d.id+'" style="margin-right:6px;padding:6px 8px;border-radius:4px;border:0;background:#1976d2;color:#fff;cursor:pointer">打开</button>' +
+            '<button class="delete-draft" data-id="'+d.id+'" style="padding:6px 8px;border-radius:4px;border:0;background:#e53935;color:#fff;cursor:pointer">删除</button></div></div></div>';
+          container.appendChild(el);
+        });
+      }
+
+      async function loadDrafts(){
+        try{
+          var r = await fetch('/api/transactions/drafts', {credentials:'include'});
+          if(!r.ok){ console.error('load drafts failed'); return; }
+          var list = await r.json();
+          renderDrafts(list);
+          // update badge count after loading drafts
+          updateDraftBadge(list ? list.length : 0);
+        }catch(e){ console.error(e); }
+      }
+
+      btn.addEventListener('click', function(){ draftsModal.style.display='block'; loadDrafts(); });
+      document.getElementById('drafts-close').addEventListener('click', function(){ draftsModal.style.display='none'; });
+
+      // open draft to edit/create
+      document.body.addEventListener('click', function(e){
+        if(e.target && e.target.classList && e.target.classList.contains('open-draft')){
+          var id = e.target.getAttribute('data-id');
+          openEditDraft(id);
+        } else if(e.target && e.target.classList && e.target.classList.contains('delete-draft')){
+          var id = e.target.getAttribute('data-id');
+          if(confirm('确认删除草稿 #' + id + ' ?')) { deleteDraft(id).then(()=>loadDrafts()); }
+        }
+      });
+
+      document.getElementById('edit-close').addEventListener('click', function(){ editModal.style.display='none'; });
+
+      function updateDraftBadge(count){
+        var badge = document.getElementById('drafts-badge');
+        if(!badge){
+          return;
+        }
+        if(count && count > 0){
+          badge.style.display = 'inline-block';
+          badge.textContent = count;
+        } else {
+          badge.style.display = 'none';
+          badge.textContent = '';
+        }
+      }
+
+      function loadDraftCount(){
+        fetch('/api/transactions/drafts', {credentials:'include'}).then(r=>{
+          if(!r.ok) return;
+          return r.json();
+        }).then(list=>{
+          if(list && Array.isArray(list)){
+            updateDraftBadge(list.length);
+          }
+        }).catch(()=>{});
+      }
+
+      function clearSplits(){
+        document.getElementById('splits-body').innerHTML = '';
+      }
+
+      function addSplitRow(s){
+        var tbody = document.getElementById('splits-body');
+        var tr = document.createElement('tr');
+        // account select shows account name (optional empty selection)
+        var accSelectHtml = '<select class="split-account"><option value="">-- 选择账户（可输入或选择） --</option>';
+        try {
+          accounts.forEach(function(a){
+            accSelectHtml += '<option value="'+a.id+'">'+(a.code ? (a.code + ' ') : '')+ (a.name || '') +'</option>';
+          });
+        } catch(e){}
+        accSelectHtml += '</select>';
+        tr.innerHTML = '<td style="padding:6px">'+accSelectHtml+'</td>' +
+          '<td style="padding:6px"><select class="split-dir"><option value="DEBIT">借</option><option value="CREDIT">贷</option></select></td>' +
+          '<td style="padding:6px"><input class="split-amt" type="number" step="0.01" style="width:140px;text-align:right" value="'+(s&&s.amount? s.amount : '')+'"/></td>' +
+          '<td style="padding:6px"><input class="split-memo" type="text" style="width:100%" value="'+(s&&s.memo? s.memo : '')+'"/></td>' +
+          '<td style="padding:6px"><button class="remove-split" style="padding:4px 8px;border-radius:4px;border:0;background:#e0e0e0;cursor:pointer">移除</button></td>';
+        tbody.appendChild(tr);
+        tr.querySelector('.remove-split').addEventListener('click', function(){ tr.remove(); });
+        // if provided s.accountName try to select; if s.accountId provided select by id
+        if (s && s.accountId) {
+          try { tr.querySelector('.split-account').value = s.accountId; } catch(e){}
+        }
+      }
+
+      document.getElementById('add-draft-split').addEventListener('click', function(){ addSplitRow(); });
+
+      // expose count updater so SSE handlers can call it
+      window.loadDraftCount = loadDraftCount;
+      window.updateDraftBadge = updateDraftBadge;
+      // initial load of draft count
+      try { loadDraftCount(); } catch(e){}
+
+      var currentDraftId = null;
+      async function openEditDraft(id){
+        try{
+          var r = await fetch('/api/transactions/drafts/' + id, {credentials:'include'});
+          if(!r.ok){ alert('无法打开草稿'); return; }
+          var d = await r.json();
+          currentDraftId = id;
+          document.getElementById('edit-desc').textContent = d.description || '';
+          document.getElementById('edit-amount').textContent = (Number(d.amount||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}));
+          clearSplits();
+          // 默认添加两行分录（借+贷）
+          addSplitRow({amount: d.amount});
+          addSplitRow({amount: d.amount});
+          editModal.style.display = 'block';
+        }catch(e){ console.error(e); alert('打开草稿失败'); }
+      }
+
+      async function deleteDraft(id){
+        try{
+          // call backend delete endpoint
+          var r = await fetch('/api/transactions/drafts/' + id, {method:'DELETE', credentials:'include'});
+          if(r.ok){
+            // refresh list and badge
+            try{ loadDrafts(); }catch(e){}
+            return;
+          }
+          // fallback: refresh list
+          try{ loadDrafts(); }catch(e){}
+        }catch(e){}
+      }
+
+      document.getElementById('create-from-draft').addEventListener('click', async function(){
+        try{
+          var rows = Array.from(document.querySelectorAll('#splits-body tr'));
+          if(rows.length < 2){ alert('至少需要两条分录'); return; }
+          var splits = rows.map(function(r){
+          return {
+              accountId: (r.querySelector('.split-account').value ? parseInt(r.querySelector('.split-account').value) : null),
+              amount: parseFloat(r.querySelector('.split-amt').value) || 0,
+              direction: r.querySelector('.split-dir').value,
+              memo: r.querySelector('.split-memo').value || null
+            };
+          });
+          // validate accounts
+          for(var s of splits){
+            if(!s.accountId){ alert('请填写所有分录的账户 ID'); return; }
+            if(!s.amount || s.amount <= 0){ alert('分录金额需大于 0'); return; }
+          }
+          var payload = {
+            tradeDate: new Date().toISOString(),
+            description: document.getElementById('edit-desc').textContent,
+            reference: 'DRAFT-' + currentDraftId,
+            cleared: false,
+            splits: splits
+          };
+          var resp = await fetch('/api/transactions/drafts/' + currentDraftId + '/create', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(payload)
+          });
+          if(!resp.ok){ var txt = await resp.text(); alert('创建失败: ' + txt); return; }
+          var created = await resp.json();
+          alert('交易已创建: ' + created.id);
+          editModal.style.display = 'none';
+          draftsModal.style.display = 'none';
+          loadDrafts();
+        }catch(e){ console.error(e); alert('创建交易失败'); }
+      });
+    })();
+</script>
+<script>
+  // 简单 SSE 客户端示例：订阅后端广播的新草稿交易事件并弹窗提示
+  (function(){
+    try {
+      var evtSrc = new EventSource('/api/notifications/subscribe');
+      evtSrc.onopen = function() { console.log('SSE connected'); };
+      // handle basic 'connected' event if server sends a named event
+      evtSrc.addEventListener('connected', function(e){
+        try { console.log('SSE server connected event:', e.data); if(window.loadDraftCount) window.loadDraftCount(); } catch(err){ console.debug(err); }
+      });
+      evtSrc.onmessage = function(e) {
+        try {
+          var raw = e.data;
+          var data = null;
+          // try parse JSON only when it looks like JSON
+          if (raw && (raw.trim().startsWith('{') || raw.trim().startsWith('['))) {
+            try { data = JSON.parse(raw); } catch(parseErr){ console.debug('SSE json parse failed', parseErr, raw); data = null; }
+          } else {
+            // not JSON — wrap
+            data = { message: raw };
+          }
+          // If the payload is our usual object (may contain payload or event), handle it.
+          if (data != null && (data.event === 'NEW_DRAFT_TRANSACTION' || data.event === undefined || (data.message && data.message.indexOf && data.message.indexOf('NEW_DRAFT_TRANSACTION') >= 0))) {
+            var payload = data.payload || data;
+            var txId = payload && payload.transactionId ? payload.transactionId : null;
+            var desc = payload && payload.description ? payload.description : (data.message || '有新的草稿交易');
+            if (txId) {
+              if (confirm(desc + '\\n是否打开交易详情？')) {
+                window.open('/transactions.html?id=' + txId, '_blank');
+              }
+            } else {
+              alert(desc);
+            }
+          }
+        } catch (ex) {
+          console.error('SSE message error', ex, e.data);
+        }
+      };
+      evtSrc.addEventListener('error', function(e){
+        console.warn('SSE connection error event', e);
+      });
+      // update draft badge on draft events
+      evtSrc.addEventListener('NEW_TRANSACTION_DRAFT', function(e){
+        try{ if(window.loadDraftCount) window.loadDraftCount(); } catch(err){ console.error(err); }
+      });
+      evtSrc.addEventListener('NEW_DRAFT_TRANSACTION', function(e){
+        try{ if(window.loadDraftCount) window.loadDraftCount(); } catch(err){ console.error(err); }
+      });
+      evtSrc.addEventListener('NEW_DRAFT_TRANSACTION', function(e){
+        try {
+          var payload = JSON.parse(e.data);
+          var txId = payload && payload.transactionId ? payload.transactionId : null;
+          var desc = payload && payload.description ? payload.description : '有新的草稿交易';
+          if (txId) {
+            if (confirm(desc + '\\n是否打开交易详情？')) {
+              window.open('/transactions.html?id=' + txId, '_blank');
+            }
+          } else {
+            alert(desc);
+          }
+        } catch (ex) { console.error(ex); }
+      });
+      evtSrc.onerror = function(e){ console.warn('SSE error', e); };
+    } catch (e) {
+      console.warn('SSE not supported', e);
+    }
+  })();
+</script>
+</body>
+</html>
