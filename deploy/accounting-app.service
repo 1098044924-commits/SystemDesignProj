@@ -1,0 +1,21 @@
+[Unit]
+Description=Accounting App (Spring Boot)
+After=network.target
+
+[Service]
+User=accounting
+Group=accounting
+EnvironmentFile=/etc/accounting-app/env
+ExecStart=/usr/bin/java -Xms256m -Xmx1g -jar /opt/accounting-app/target/SystemDesignProj-1.0-SNAPSHOT.jar --spring.config.location=file:/etc/accounting-app/application-prod.yml
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+

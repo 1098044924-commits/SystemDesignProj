@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>会计工作台 - 记账系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --primary-soft: #dbeafe;
+            --border: #e2e8f0;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+
+        header {
+            padding: 16px 24px;
+            background: #0f172a;
+            color: #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        header span {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        main {
+            padding: 16px 24px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            border-radius: 999px;
+            padding: 8px 14px;
+            border: 1px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: var(--primary-soft);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 16px;
+        }
+
+        .card p.desc {
+            margin: 0 0 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        form {
+            display: grid;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 7px 9px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        button {
+            border-radius: 999px;
+            border: none;
+            padding: 7px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-icon {
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .status-bar {
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .status-bar span {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-ok {
+            color: #16a34a;
+        }
+
+        .status-error {
+            color: #b91c1c;
+        }
+
+        .status-pending {
+            color: #ea580c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border);
+            padding: 6px 4px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            background: #f9fafb;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 1px 8px;
+            font-size: 11px;
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            color: var(--text-muted);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>会计工作台</h1>
+        <span id="user-info">加载中...</span>
+    </div>
+    <div style="font-size:12px;color:#9ca3af;">
+        <a href="/logout" style="color:#9ca3af;text-decoration:none;">退出登录</a>
+    </div>
+</header>
+
+<!-- debug banner removed -->
+
+<main>
+    <div class="tabs">
+        <button class="tab active" data-tab="transactions">交易录入与查询</button>
+        <button class="tab" data-tab="reports">财务报表</button>
+        <button class="tab" data-tab="reconcile">对账 / 未清算</button>
+        <button class="tab" data-tab="purchases">采购管理</button>
+    </div>
+
+    <!-- 交易 TAB -->
+    <section id="tab-transactions" class="tab-panel active">
+        <div class="grid">
+            <div class="card">
+                <h2>创建交易</h2>
+                <p class="desc">对应接口：<code>POST /api/transactions</code>（双式记账 + 多条分录）</p>
+                <form id="form-create-transaction">
+                    <div>
+                        <label>交易日期</label>
+                        <input type="datetime-local" name="tradeDate" required />
+                    </div>
+                    <div>
+                        <label>描述</label>
+                        <input type="text" name="description" />
+                    </div>
+                    <div>
+                        <label>参考号</label>
+                        <input type="text" name="reference" />
+                    </div>
+
+                    <hr style="margin:10px 0;border:none;border-top:1px dashed var(--border);" />
+                    <div class="toolbar">
+                        <span class="badge">分录列表（至少两条，借贷相等）</span>
+                        <button type="button" id="btn-add-split" class="btn-secondary btn-icon">+ 新增分录</button>
+                    </div>
+
+                    <div id="splits-container"></div>
+
+                    <hr style="margin:10px 0;border:none;border-top:1px dashed var(--border);" />
+                    <div>
+                        <label>发票上传（可选）</label>
+                        <input type="file" id="invoice-files" name="files" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.doc,.docx" />
+                        <small style="color:var(--text-muted);font-size:11px;">支持 PDF、JPG、PNG 等格式，可上传多个文件</small>
+                        <div id="file-list" style="margin-top:8px;font-size:12px;"></div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn-primary">创建交易</button>
+                    </div>
+                </form>
+                <div id="status-create-transaction" class="status-bar"></div>
+            </div>
+
+            <div class="card">
+                <div class="toolbar">
+                    <h2>交易列表</h2>
+                    <div class="toolbar-right">
+                        <button id="btn-tx-prev" class="btn-secondary btn-icon">&lt;</button>
+                        <span id="tx-page-info" style="font-size:12px;color:var(--text-muted);">第 1 页</span>
+                        <button id="btn-tx-next" class="btn-secondary btn-icon">&gt;</button>
+                        <button id="btn-refresh-tx" class="btn-secondary">刷新</button>
+                    </div>
+                </div>
+                <p class="desc">对应接口：<code>GET /api/transactions?page=&amp;size=</code></p>
+                <div style="max-height:600px;overflow:auto;">
+                    <table id="table-transactions">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>日期</th>
+                            <th>描述</th>
+                            <th>参考号</th>
+                            <th>已核对</th>
+                            <th>分录数量</th>
+                            <th>操作员</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 采购 TAB（员工） -->
+    <section id="tab-purchases" class="tab-panel" style="display:none">
+        <div class="grid">
+            <div class="card" style="flex:1">
+                <h2>供应商管理</h2>
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <input id="acct-sup-q" placeholder="按供应商或商品搜索" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px">
+                    <button id="acct-btn-sup-search" class="btn-secondary">搜索</button>
+                </div>
+                <div id="acct-sup-list" style="margin-top:8px"></div>
+                <hr style="margin:12px 0">
+                <h3>新增供应商</h3>
+                <div style="display:grid;gap:8px">
+                    <input id="acct-sup-name" placeholder="供应商名称" />
+                    <input id="acct-sup-location" placeholder="地点" />
+                    <input id="acct-sup-email" placeholder="联系邮箱" />
+                    <input id="acct-sup-product" placeholder="关联商品名称" />
+                    <input id="acct-sup-price" placeholder="商品单价" type="number" step="0.01" />
+                    <div><button id="acct-btn-create-sup" class="btn-primary">创建供应商</button></div>
+                </div>
+            </div>
+
+            <div class="card" style="flex:1">
+                <h2>我的采购单</h2>
+                <div style="display:grid;gap:8px">
+                    <select id="acct-po-supplier"></select>
+                    <input id="acct-po-product" placeholder="采购商品名称" />
+                    <input id="acct-po-qty" placeholder="数量" type="number" />
+                    <div style="text-align:right"><button id="acct-btn-submit-po" class="btn-primary">提交采购单</button></div>
+                </div>
+                <hr style="margin:12px 0">
+                <div id="acct-my-orders"></div>
+            </div>
+        </div>
+    </section>
+    <!-- 报表 TAB -->
+    <section id="tab-reports" class="tab-panel">
+        <div class="grid">
+            <div class="card">
+                <h2>资产负债表 &amp; 损益表</h2>
+                <p class="desc">
+                    资产负债表：<code>GET /api/reports/balance-sheet</code>；
+                    损益表：<code>GET /api/reports/income-statement</code>
+                </p>
+                <div class="toolbar">
+                    <div class="toolbar-right">
+                        <button id="btn-load-balance-sheet" class="btn-secondary">加载资产负债表</button>
+                        <button id="btn-load-income-statement" class="btn-secondary">加载损益表</button>
+                    </div>
+                </div>
+                <h3 style="font-size:14px;margin:10px 0 4px;">资产负债表</h3>
+                <div id="balance-sheet"></div>
+                <h3 style="font-size:14px;margin:12px 0 4px;">损益表</h3>
+                <div id="income-statement"></div>
+            </div>
+
+            <div class="card">
+                <h2>试算平衡表</h2>
+                <p class="desc">对应接口：<code>GET /api/reports/trial-balance</code></p>
+                <div class="toolbar">
+                    <div class="toolbar-right">
+                        <button id="btn-load-trial-balance" class="btn-secondary">加载试算平衡表</button>
+                    </div>
+                </div>
+                <div id="trial-balance"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 对账 TAB -->
+    <section id="tab-reconcile" class="tab-panel">
+        <div class="card">
+            <div class="toolbar">
+                <h2>待核对交易（未清算）</h2>
+                <div class="toolbar-right">
+                    <button id="btn-rec-prev" class="btn-secondary btn-icon">&lt;</button>
+                    <span id="rec-page-info" style="font-size:12px;color:var(--text-muted);">第 1 页</span>
+                    <button id="btn-rec-next" class="btn-secondary btn-icon">&gt;</button>
+                    <button id="btn-refresh-rec" class="btn-secondary">刷新</button>
+                </div>
+            </div>
+            <p class="desc">对应接口：<code>GET /api/transactions/reconcile?page=&amp;size=</code></p>
+            <div style="max-height:420px;overflow:auto;">
+                <table id="table-reconcile">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>日期</th>
+                        <th>描述</th>
+                        <th>参考号</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    const apiBase = '';
+
+    // debug logging removed
+
+    // 缓存账户列表，用于交易分录中下拉选择账户名称
+    let accounts = [];
+    // 当前用户信息
+    let currentUser = null;
+
+    function setStatus(el, type, message) {
+        if (!el) return;
+        if (!message) {
+            el.innerHTML = '';
+            return;
+        }
+        const cls = type === 'ok' ? 'status-ok'
+            : type === 'error' ? 'status-error'
+                : 'status-pending';
+        el.innerHTML = '<span class="' + cls + '">' + message + '</span>';
+    }
+
+    // TAB 切换
+    document.querySelectorAll('.tab').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const target = btn.dataset.tab;
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // ensure only the target panel is visible — remove inline display from others to avoid conflicts
+            document.querySelectorAll('.tab-panel').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            const panel = document.getElementById('tab-' + target);
+            if (panel) {
+                panel.classList.add('active');
+                panel.style.display = 'block';
+            }
+            // 切换到交易标签页时，重新加载账户列表（以防账户列表更新）
+            if (target === 'transactions') {
+                await loadAccounts();
+                // 更新现有分录行的账户下拉框
+                const splitsContainer = document.getElementById('splits-container');
+                if (splitsContainer) {
+                    splitsContainer.querySelectorAll('select[name="accountId"]').forEach(select => {
+                        select.innerHTML = buildAccountOptionsHtml();
+                    });
+                }
+            }
+        });
+    });
+    // ensure initial active panel is visible (address inline-style defaulting)
+    document.querySelectorAll('.tab-panel').forEach(p => {
+        if (p.classList.contains('active')) p.style.display = 'block';
+        else p.style.display = 'none';
+    });
+
+    // ===== 加载当前用户信息 =====
+    async function loadCurrentUser() {
+        try {
+            const resp = await fetch(apiBase + '/api/auth/me', {
+                credentials: 'include'
+            });
+            if (resp.ok) {
+                currentUser = await resp.json();
+                const userInfoEl = document.getElementById('user-info');
+                if (userInfoEl) {
+                    userInfoEl.textContent = '当前用户：' + currentUser.username + '（会计）';
+                }
+            } else {
+                // 如果未登录，跳转到登录页
+                window.location.href = '/login.html';
+            }
+        } catch (e) {
+            console.error('加载用户信息失败:', e);
+            window.location.href = '/login.html';
+        }
+    }
+
+    // ===== 账户：加载账户列表，用于分录中下拉选择 =====
+    async function loadAccounts() {
+        try {
+            const resp = await fetch(apiBase + '/api/accounts', {
+                credentials: 'include'
+            });
+            if (!resp.ok) {
+                if (resp.status === 403) {
+                    throw new Error('权限不足：无法访问账户列表，请联系管理员');
+                }
+                throw new Error('HTTP ' + resp.status);
+            }
+            accounts = await resp.json();
+            console.log('账户列表加载成功，共', accounts.length, '个账户');
+        } catch (e) {
+            console.error('加载账户列表失败:', e);
+            accounts = [];
+            // 显示错误提示
+            const splitsContainer = document.getElementById('splits-container');
+            if (splitsContainer && splitsContainer.children.length === 0) {
+                // 如果还没有分录行，显示错误提示
+                alert('加载账户列表失败：' + e.message + '\n\n请刷新页面重试，或联系管理员。');
+            }
+        }
+    }
+
+    // ===== 交易：分录动态行 =====
+    const splitsContainer = document.getElementById('splits-container');
+
+    function buildAccountOptionsHtml() {
+        if (!accounts || accounts.length === 0) {
+            return '<option value="">暂无账户（请刷新页面或联系管理员）</option>';
+        }
+        let html = '<option value="">请选择账户</option>';
+        for (const acc of accounts) {
+            const label = (acc.code ? acc.code + ' - ' : '') + acc.name + (acc.currencySymbol ? ' (' + acc.currencySymbol + ')' : '');
+            html += `<option value="${acc.id}">${label}</option>`;
+        }
+        return html;
+    }
+
+    function addSplitRow() {
+        const idx = splitsContainer.children.length;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'split-row-wrapper';
+        wrapper.style.border = '1px solid var(--border)';
+        wrapper.style.borderRadius = '8px';
+        wrapper.style.padding = '8px';
+        wrapper.style.marginBottom = '6px';
+        wrapper.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <span class="badge">分录 #${idx + 1}</span>
+                <button type="button" class="btn-danger btn-icon btn-remove-split">删除</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;">
+                <div>
+                    <label>账户名称</label>
+                    <select name="accountId" required>
+                        ${buildAccountOptionsHtml()}
+                    </select>
+                </div>
+                <div>
+                    <label>金额</label>
+                    <input type="number" name="amount" step="0.01" required />
+                </div>
+                <div>
+                    <label>借贷方向</label>
+                    <select name="direction" required>
+                        <option value="DEBIT">DEBIT 借</option>
+                        <option value="CREDIT">CREDIT 贷</option>
+                    </select>
+                </div>
+                <div>
+                    <label>商品 ID（可选）</label>
+                    <input type="number" name="commodityId" />
+                </div>
+                <div>
+                    <label>数量（可选）</label>
+                    <input type="number" name="quantity" step="0.000001" />
+                </div>
+                <div>
+                    <label>单价（可选）</label>
+                    <input type="number" name="price" step="0.000001" />
+                </div>
+                <div style="grid-column:1/3;">
+                    <label>备注（可选）</label>
+                    <input type="text" name="memo" />
+                </div>
+            </div>
+        `;
+        splitsContainer.appendChild(wrapper);
+        wrapper.querySelector('.btn-remove-split').addEventListener('click', () => {
+            splitsContainer.removeChild(wrapper);
+        });
+    }
+
+    document.getElementById('btn-add-split').addEventListener('click', () => {
+        addSplitRow();
+    });
+
+    // ===== 文件上传：显示文件列表 =====
+    document.getElementById('invoice-files').addEventListener('change', (e) => {
+        const fileList = document.getElementById('file-list');
+        const files = e.target.files;
+        if (files.length === 0) {
+            fileList.innerHTML = '';
+            return;
+        }
+        let html = '<div style="margin-top:4px;">已选择文件：</div>';
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const size = (file.size / 1024).toFixed(2);
+            html += `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+                • ${file.name} (${size} KB)
+            </div>`;
+        }
+        fileList.innerHTML = html;
+    });
+
+    // 默认两条分录
+    (async () => {
+        await loadAccounts();
+        addSplitRow();
+        addSplitRow();
+    })();
+
+    // ===== 交易：创建 =====
+    document.getElementById('form-create-transaction').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const statusEl = document.getElementById('status-create-transaction');
+        const formData = new FormData(form);
+
+        const tradeDateRaw = formData.get('tradeDate');
+        const tradeDate = tradeDateRaw ? new Date(tradeDateRaw).toISOString() : null;
+
+        const payload = {
+            tradeDate: tradeDate,
+            description: formData.get('description') || null,
+            reference: formData.get('reference') || null,
+            cleared: false,  // 会计员创建的交易默认未核对，需要管理员审核
+            splits: []
+        };
+
+        // 只选择直接子元素（分录行 wrapper），避免选中内部嵌套的 div
+        Array.from(splitsContainer.children).forEach(wrapper => {
+            const fd = new FormData();
+            wrapper.querySelectorAll('input, select').forEach(inp => {
+                fd.set(inp.name, inp.value);
+            });
+            const split = {
+                accountId: fd.get('accountId') ? Number(fd.get('accountId')) : null,
+                amount: fd.get('amount') ? Number(fd.get('amount')) : null,
+                direction: fd.get('direction') || null,
+                quantity: fd.get('quantity') ? Number(fd.get('quantity')) : null,
+                price: fd.get('price') ? Number(fd.get('price')) : null,
+                commodityId: fd.get('commodityId') ? Number(fd.get('commodityId')) : null,
+                memo: fd.get('memo') || null
+            };
+            if (split.accountId && split.amount) {
+                payload.splits.push(split);
+            }
+        });
+
+        // 去重：如果同一账户在同一方向有相同的金额，只保留一条（防止用户误操作）
+        const seen = new Set();
+        payload.splits = payload.splits.filter(split => {
+            const key = `${split.accountId}_${split.direction}_${split.amount}`;
+            if (seen.has(key)) {
+                console.warn('检测到重复分录，已自动去重：', split);
+                return false;
+            }
+            seen.add(key);
+            return true;
+        });
+
+        if (payload.splits.length < 2) {
+            setStatus(statusEl, 'error', '至少需要两条分录（借贷双方）。');
+            return;
+        }
+
+        setStatus(statusEl, 'pending', '正在创建交易...');
+        try {
+            // 检查是否有文件上传
+            const fileInput = document.getElementById('invoice-files');
+            const files = fileInput.files;
+            
+            let resp;
+            if (files && files.length > 0) {
+                // 使用multipart/form-data上传（包含文件）
+                const formData = new FormData();
+                formData.append('transaction', JSON.stringify(payload));
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
+                }
+                resp = await fetch(apiBase + '/api/transactions', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+            } else {
+                // 使用JSON格式（兼容旧接口）
+                resp = await fetch(apiBase + '/api/transactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+            }
+            if (!resp.ok) {
+                const text = await resp.text();
+                throw new Error('HTTP ' + resp.status + ': ' + text);
+            }
+            const data = await resp.json();
+            setStatus(statusEl, 'ok', '创建成功，交易 ID：' + data.id);
+            form.reset();
+            // 清空文件列表
+            document.getElementById('invoice-files').value = '';
+            document.getElementById('file-list').innerHTML = '';
+            loadTransactions();
+        } catch (e2) {
+            console.error(e2);
+            setStatus(statusEl, 'error', '创建失败：' + e2.message);
+        }
+    });
+
+    // ===== 交易：列表 & 分页 =====
+    let txPage = 0;
+    const txSize = 10;
+
+    async function loadTransactions() {
+        const tbody = document.querySelector('#table-transactions tbody');
+        const pageInfo = document.getElementById('tx-page-info');
+        tbody.innerHTML = '<tr><td colspan="7">加载中...</td></tr>';
+        try {
+            const resp = await fetch(apiBase + '/api/transactions?page=' + txPage + '&size=' + txSize, {
+                credentials: 'include'
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            const content = data.content || [];
+            tbody.innerHTML = '';
+            if (content.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">暂无交易记录。</td></tr>';
+            } else {
+                for (const tx of content) {
+                    const tr = document.createElement('tr');
+                    const date = tx.tradeDate ? new Date(tx.tradeDate).toLocaleString() : '';
+                    tr.innerHTML = `
+                        <td>${tx.id}</td>
+                        <td>${date}</td>
+                        <td>${tx.description || ''}</td>
+                        <td>${tx.reference || ''}</td>
+                        <td>${tx.cleared ? '是' : '否'}</td>
+                        <td>${Array.isArray(tx.splits) ? tx.splits.length : 0}</td>
+                        <td>${tx.operator || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+            pageInfo.textContent = '第 ' + (data.number + 1) + ' / ' + (data.totalPages || 1) + ' 页（共 ' + (data.totalElements || 0) + ' 条）';
+        } catch (e) {
+            console.error(e);
+            tbody.innerHTML = '<tr><td colspan="7">加载失败：' + e.message + '</td></tr>';
+        }
+    }
+
+    document.getElementById('btn-tx-prev').addEventListener('click', () => {
+        if (txPage > 0) {
+            txPage--;
+            loadTransactions();
+        }
+    });
+    document.getElementById('btn-tx-next').addEventListener('click', () => {
+        txPage++;
+        loadTransactions();
+    });
+    document.getElementById('btn-refresh-tx').addEventListener('click', loadTransactions);
+
+    loadTransactions();
+
+    // ===== 报表 =====
+    async function loadBalanceSheet() {
+        const el = document.getElementById('balance-sheet');
+        el.innerHTML = '加载中...';
+        try {
+            const resp = await fetch(apiBase + '/api/reports/balance-sheet', {
+                credentials: 'include'
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            function renderItems(title, items) {
+                if (!items || items.length === 0) return `<h4>${title}</h4><p class="status-pending">暂无数据</p>`;
+                let html = `<h4>${title}</h4><table><thead><tr><th>科目代码</th><th>名称</th><th>类型</th><th>金额</th></tr></thead><tbody>`;
+                for (const it of items) {
+                    html += `<tr><td>${it.accountCode}</td><td>${it.accountName}</td><td>${it.accountType}</td><td>${it.amount}</td></tr>`;
+                }
+                html += '</tbody></table>';
+                return html;
+            }
+            el.innerHTML =
+                renderItems('资产（Assets）', data.assets) +
+                renderItems('负债（Liabilities）', data.liabilities) +
+                renderItems('所有者权益（Equity）', data.equity);
+        } catch (e) {
+            console.error(e);
+            el.innerHTML = '<span class="status-error">加载失败：' + e.message + '</span>';
+        }
+    }
+
+    async function loadIncomeStatement() {
+        const el = document.getElementById('income-statement');
+        el.innerHTML = '加载中...';
+        try {
+            const resp = await fetch(apiBase + '/api/reports/income-statement', {
+                credentials: 'include'
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            function renderItems(title, items) {
+                if (!items || items.length === 0) return `<h4>${title}</h4><p class="status-pending">暂无数据</p>`;
+                let html = `<h4>${title}</h4><table><thead><tr><th>科目代码</th><th>名称</th><th>类型</th><th>金额</th></tr></thead><tbody>`;
+                for (const it of items) {
+                    html += `<tr><td>${it.accountCode}</td><td>${it.accountName}</td><td>${it.accountType}</td><td>${it.amount}</td></tr>`;
+                }
+                html += '</tbody></table>';
+                return html;
+            }
+            el.innerHTML =
+                renderItems('收入（Incomes）', data.incomes) +
+                renderItems('费用（Expenses）', data.expenses);
+        } catch (e) {
+            console.error(e);
+            el.innerHTML = '<span class="status-error">加载失败：' + e.message + '</span>';
+        }
+    }
+
+    async function loadTrialBalance() {
+        const el = document.getElementById('trial-balance');
+        el.innerHTML = '加载中...';
+        try {
+            const resp = await fetch(apiBase + '/api/reports/trial-balance', {
+                credentials: 'include'
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            const rows = data.rows || [];
+            if (rows.length === 0) {
+                el.innerHTML = '<p class="status-pending">暂无试算平衡数据。</p>';
+                return;
+            }
+            let html = '<table><thead><tr><th>科目代码</th><th>名称</th><th>借方</th><th>贷方</th></tr></thead><tbody>';
+            for (const r of rows) {
+                html += `<tr><td>${r.accountCode}</td><td>${r.accountName}</td><td>${r.debit}</td><td>${r.credit}</td></tr>`;
+            }
+            html += `<tr><th colspan="2">合计</th><th>${data.totalDebit}</th><th>${data.totalCredit}</th></tr>`;
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        } catch (e) {
+            console.error(e);
+            el.innerHTML = '<span class="status-error">加载失败：' + e.message + '</span>';
+        }
+    }
+
+    document.getElementById('btn-load-balance-sheet').addEventListener('click', loadBalanceSheet);
+    document.getElementById('btn-load-income-statement').addEventListener('click', loadIncomeStatement);
+    document.getElementById('btn-load-trial-balance').addEventListener('click', loadTrialBalance);
+
+    // ===== 对账 / 未清算 =====
+    let recPage = 0;
+    const recSize = 10;
+
+    async function loadReconcile() {
+        const tbody = document.querySelector('#table-reconcile tbody');
+        const pageInfo = document.getElementById('rec-page-info');
+        tbody.innerHTML = '<tr><td colspan="4">加载中...</td></tr>';
+        try {
+            const resp = await fetch(apiBase + '/api/transactions/reconcile?page=' + recPage + '&size=' + recSize, {
+                credentials: 'include'
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            const content = data.content || [];
+            tbody.innerHTML = '';
+            if (content.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">暂无未清算交易。</td></tr>';
+            } else {
+                for (const tx of content) {
+                    const tr = document.createElement('tr');
+                    const date = tx.tradeDate ? new Date(tx.tradeDate).toLocaleString() : '';
+                    tr.innerHTML = `
+                        <td>${tx.id}</td>
+                        <td>${date}</td>
+                        <td>${tx.description || ''}</td>
+                        <td>${tx.reference || ''}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+            pageInfo.textContent = '第 ' + (data.number + 1) + ' / ' + (data.totalPages || 1) + ' 页（共 ' + (data.totalElements || 0) + ' 条）';
+        } catch (e) {
+            console.error(e);
+            tbody.innerHTML = '<tr><td colspan="4">加载失败：' + e.message + '</td></tr>';
+        }
+    }
+
+    document.getElementById('btn-rec-prev').addEventListener('click', () => {
+        if (recPage > 0) {
+            recPage--;
+            loadReconcile();
+        }
+    });
+    document.getElementById('btn-rec-next').addEventListener('click', () => {
+        recPage++;
+        loadReconcile();
+    });
+    document.getElementById('btn-refresh-rec').addEventListener('click', loadReconcile);
+
+    loadReconcile();
+
+    // ===== 采购（员工端）功能 =====
+    let __acctEditingOrderId = null;
+    async function acctLoadSuppliers(q=''){
+        try{
+            const url = apiBase + '/api/purchase/suppliers' + (q ? ('?q=' + encodeURIComponent(q)) : '');
+            const r = await fetch(url, {credentials:'include'});
+            const el = document.getElementById('acct-sup-list');
+            if(!r.ok){ if(el) el.textContent='加载失败'; return; }
+            const list = await r.json();
+            if(!list || !list.length){
+                el.innerHTML = '<div class="muted">暂无供应商。<button id="acct-create-sup-cta" class="btn-primary" style="margin-left:8px">去创建供应商</button></div>';
+                // bind CTA to focus the create form
+                const ctaBtn = document.getElementById('acct-create-sup-cta');
+                if(ctaBtn) ctaBtn.addEventListener('click', () => {
+                    const nameInput = document.getElementById('acct-sup-name');
+                    if(nameInput){ nameInput.focus(); nameInput.scrollIntoView({behavior:'smooth', block:'center'}); }
+                });
+                return;
+            }
+            let html = '<table><thead><tr><th>名称</th><th>地点</th><th>邮箱</th><th>商品</th><th>单价</th></tr></thead><tbody>';
+            list.forEach(s => html += `<tr><td>${s.name}</td><td>${s.location||''}</td><td>${s.email||''}</td><td>${s.productName||''}</td><td style="text-align:right">${Number(s.unitPrice||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`);
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        }catch(e){ console.error(e); const el=document.getElementById('acct-sup-list'); if(el) el.textContent='异常'; }
+    }
+
+    async function acctLoadSuppliersToSelect(){
+        try{
+            const r = await fetch(apiBase + '/api/purchase/suppliers', {credentials:'include'});
+            if(!r.ok) return;
+            const list = await r.json();
+            const sel = document.getElementById('acct-po-supplier');
+            if(!sel) return;
+            sel.innerHTML = '<option value="">请选择供应商</option>';
+            list.forEach(s=> {
+                const o = document.createElement('option');
+                o.value = s.id;
+                o.textContent = `${s.name} — ${s.productName} (${Number(s.unitPrice||0).toLocaleString()})`;
+                sel.appendChild(o);
+            });
+        }catch(e){ console.error(e); }
+    }
+
+    async function acctCreateSupplier(){
+        const req = {
+            name: document.getElementById('acct-sup-name').value,
+            location: document.getElementById('acct-sup-location').value,
+            email: document.getElementById('acct-sup-email').value,
+            productName: document.getElementById('acct-sup-product').value,
+            unitPrice: parseFloat(document.getElementById('acct-sup-price').value || '0')
+        };
+        try{
+            const r = await fetch(apiBase + '/api/purchase/suppliers', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(req)});
+            if(!r.ok){ alert('创建失败'); return; }
+            alert('创建成功');
+            acctLoadSuppliers(''); acctLoadSuppliersToSelect();
+        }catch(e){ console.error(e); alert('异常'); }
+    }
+
+    async function acctSubmitPurchase(){
+        const req = {
+            productName: document.getElementById('acct-po-product').value,
+            supplierId: Number(document.getElementById('acct-po-supplier').value || 0),
+            quantity: Number(document.getElementById('acct-po-qty').value || 0)
+        };
+        try{
+            if(__acctEditingOrderId){
+                const r = await fetch(apiBase + '/api/purchase/orders/' + __acctEditingOrderId, {method:'PUT', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(req)});
+                if(!r.ok){ alert('更新失败'); return; }
+                alert('更新并提交成功');
+                __acctEditingOrderId = null;
+                document.getElementById('acct-btn-submit-po').textContent = '提交采购单';
+            } else {
+                const r = await fetch(apiBase + '/api/purchase/orders', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(req)});
+                if(!r.ok){ alert('提交失败'); return; }
+                alert('提交成功，等待审核');
+            }
+            acctLoadMyOrders();
+        }catch(e){ console.error(e); alert('异常'); }
+    }
+
+    async function acctLoadMyOrders(){
+        try{
+            const r = await fetch(apiBase + '/api/purchase/orders/my', {credentials:'include'});
+            const el = document.getElementById('acct-my-orders');
+            if(!r.ok){ if(el) el.textContent='加载失败'; return; }
+            const list = await r.json();
+            if(!list || !list.length){ el.innerHTML = '<div class="muted">暂无采购单</div>'; return; }
+            let html = '<table><thead><tr><th>ID</th><th>商品</th><th>供应商ID</th><th>数量</th><th>单价</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+            list.forEach(o=> {
+                html += `<tr><td>${o.id}</td><td>${o.productName}</td><td>${o.supplierId}</td><td>${o.quantity}</td><td style="text-align:right">${Number(o.unitPrice||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td>${o.status}</td><td>${o.status==='REJECTED'?'<button class="acct-edit" data-id="'+o.id+'">编辑并重提交</button>':''} <button class="acct-history" data-id="${o.id}">查看历史</button></td></tr>`;
+            });
+            html += '</tbody></table>';
+            el.innerHTML = html;
+            el.querySelectorAll('.acct-edit').forEach(b=> b.addEventListener('click', ()=>{
+                const id = b.dataset.id;
+                const row = list.find(x=>x.id==id);
+                if(!row) return;
+                document.getElementById('acct-po-product').value = row.productName;
+                document.getElementById('acct-po-qty').value = row.quantity;
+                document.getElementById('acct-po-supplier').value = row.supplierId;
+                __acctEditingOrderId = id;
+                document.getElementById('acct-btn-submit-po').textContent = '更新并提交';
+            }));
+            el.querySelectorAll('.acct-history').forEach(b=> b.addEventListener('click', ()=> showPurchaseHistoryModal(b.dataset.id)));
+        }catch(e){ console.error(e); const el=document.getElementById('acct-my-orders'); if(el) el.textContent='异常'; }
+    }
+
+    async function showPurchaseHistoryModal(orderId){
+        let modal = document.getElementById('acct-po-history-modal');
+        if(!modal){
+            modal = document.createElement('div');
+            modal.id = 'acct-po-history-modal';
+            modal.style.cssText = 'display:none;position:fixed;left:0;top:0;right:0;bottom:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:2000;overflow:auto;';
+            modal.innerHTML = `<div style="background:#fff;padding:16px;border-radius:8px;width:720px;max-width:96%;max-height:80vh;overflow:auto;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h3 style="margin:0">审核历史</h3><button id="acct-po-history-close" class="btn">关闭</button></div><div id="acct-po-history-body">加载中...</div></div>`;
+            document.body.appendChild(modal);
+            document.getElementById('acct-po-history-close').addEventListener('click', ()=> modal.style.display='none');
+        }
+        modal.style.display = 'flex';
+        const body = document.getElementById('acct-po-history-body');
+        body.innerHTML = '加载中...';
+        try{
+            const resp = await fetch(apiBase + '/api/purchase/orders/' + orderId + '/audits', {credentials:'include'});
+            if(!resp.ok){ const txt = await resp.text().catch(()=>''); body.innerHTML = `<div class="muted">加载失败：HTTP ${resp.status} ${txt}</div>`; return; }
+            const list = await resp.json();
+            if(!list || !list.length){ body.innerHTML = '<div class="muted">暂无历史记录</div>'; return; }
+            let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>时间</th><th>动作</th><th>操作者</th><th>说明</th></tr></thead><tbody>';
+            list.forEach(it=> html += `<tr><td style="padding:8px">${new Date(it.createdAt).toLocaleString()}</td><td style="padding:8px">${it.action}</td><td style="padding:8px">${it.actor}</td><td style="padding:8px">${it.comment||''}</td></tr>`);
+            html += '</tbody></table>';
+            body.innerHTML = html;
+        }catch(e){ body.innerHTML = `<div class="muted">加载失败：${e.message||String(e)}</div>`; console.error(e); }
+    }
+
+    // bind buttons
+    document.getElementById('acct-btn-sup-search')?.addEventListener('click', ()=> acctLoadSuppliers(document.getElementById('acct-sup-q').value));
+    document.getElementById('acct-btn-create-sup')?.addEventListener('click', acctCreateSupplier);
+    document.getElementById('acct-btn-submit-po')?.addEventListener('click', acctSubmitPurchase);
+    // ensure supplier select and my orders load once user info available
+    (async ()=>{ await acctLoadSuppliersToSelect(); acctLoadSuppliers(''); acctLoadMyOrders(); })();
+
+    // ===== 页面初始化 =====
+    (async () => {
+        // 先加载用户信息
+        await loadCurrentUser();
+        // 加载账户列表（用于交易录入）
+        await loadAccounts();
+    })();
+</script>
+</body>
+</html>
+
